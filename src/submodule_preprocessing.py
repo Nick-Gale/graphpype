@@ -22,8 +22,20 @@ class DataSet:
 
 class DataType:
     """The type of the data assumed to a tensor with a given number of dimensions."""
+    name: str
+    description: str
+    dimensions: list[float]
+
+class Network: # <: DataType
+    """A given network data"""
 
 # Functions
 
 def _concatenate_raw(dirs...):
-    """Take a list of data directories and concatenate 
+    """Take a list of data directories and concatenate"""
+
+
+# Pre-Processing Functions
+# ----------------------------------------------------------------------------------------
+# NOTE: Need to import the NiPy libs here. Have some basic preprocessing data 
+# ----------------------------------------------------------------------------------------
