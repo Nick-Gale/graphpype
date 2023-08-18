@@ -16,7 +16,7 @@ class DataSet:
     dtype: "DataType"
     """The datatype (i.e. (Float, ArrayDims(...))) for each element in the dataset."""
 
-    data: list["Data"]
+    data: list
     def __init__(self, name, description):
         """Initialises an empty data set"""
 
@@ -24,10 +24,18 @@ class DataType:
     """The type of the data assumed to a tensor with a given number of dimensions."""
     name: str
     description: str
+    primitive
     dimensions: list[float]
+    
+    def __init__(self, data, n, d):
+        self.name = n
+        self.description = d
+        self.dimensions = np.size(np.array(data))
+        self.primitive = 
+
 
 class Network: # <: DataType
-    """A given network data"""
+    """A given network datum"""
 
 # Functions
 
@@ -38,4 +46,7 @@ def _concatenate_raw(dirs...):
 # Pre-Processing Functions
 # ----------------------------------------------------------------------------------------
 # NOTE: Need to import the NiPy libs here. Have some basic preprocessing data 
+# NOTE: Need to import genetic-imaging preprocessing here. Are there standarised formats for this. What do we actually need from this modality.
+# NOTE: Need to fully list all preprocessing dependencies. This is a difficult propsect due to lack of clarity. Strategy is to implement on demand for a different imaging modality
+# NOTE: MRtrix support and other compiled programs. DTI will be a reference modality at some point - MRtrix is a CLI but compiled program for comprehensive preprocessing.
 # ----------------------------------------------------------------------------------------
