@@ -1,5 +1,5 @@
 [project]
-name = "NetworkAnalysis"
+name = "neuroGraphPype"
 
 description = "Streamlining and automating network analysis with a focus on neuroimaging data."
 
