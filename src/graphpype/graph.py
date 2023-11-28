@@ -43,12 +43,12 @@ def degreeCDF(G):
 
     ecdf = sm.distributions.empirical_distribution.ECDF(degs)
 
-    uniqueDegs = list(set(degs))
+    uniqueDegs = sorted(set(degs))
 
     cdf = numpy.array([ecdf(i) for i in uniqueDegs])
 
     logcdf = numpy.log(cdf)
-
+    
     return uniqueDegs, cdf, logcdf, ecdf, degs
 
     
@@ -63,7 +63,7 @@ def featureDegreeDistribution(G, feature):
     """Concatenates features with the same degree and returns the mean and deviation"""
     degs = numpy.array([d for n, d in G.degree()])
     nodes = numpy.array([n for n, d in G.degree()])
-    uniqueDegs = list(set(degs))
+    uniqueDegs = sorted(set(degs))
     
     featureData = []
     featureMean = []
@@ -107,7 +107,8 @@ def constructMinSpanDensity(covariance, density=0.1, seed=0):
     M = networkx.Graph(covariance)
 
     Smat = networkx.to_numpy_array(networkx.minimum_spanning_tree(M))
-
+    
+    Smat[Smat > 0] = 1
     # sample required edges using covariances as weights
     nedges = numpy.sum(Smat)
 
@@ -117,13 +118,15 @@ def constructMinSpanDensity(covariance, density=0.1, seed=0):
 
     weights = unsampled_covariances.reshape(-1) / numpy.sum(unsampled_covariances)
     
-
-    edge_index_sample = numpy.random.choice(len(weights), edges_required, replace=False, p=weights)
+    ascending_order = numpy.sort(weights)
+    minimum_weight = ascending_order[-edges_required]
+    
+    edge_index_sample = weights > minimum_weight
 
     # construct edges as adjacency matrix
     edges = numpy.zeros(len(weights))
-    
-    edges[edge_index_sample] = numpy.ones(len(edge_index_sample))
+
+    edges[edge_index_sample] = 1 
     
     adj = Smat + edges.reshape(L, L)
 

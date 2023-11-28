@@ -25,6 +25,9 @@ def modularOverlap(*modules):
                         t = [((mod[i] in modules[qj][x]) and (mod[j] in modules[qj][x])) for x in range(len(modules[qj]))]
                         membership += int(any(t))
                         totalCount += 1
+                if len(mod) == 1:
+                    membership += 1
+                    totalCount += 1
             statistic[qi, qj] = membership / totalCount 
     return numpy.mean(statistic.flatten())
 
