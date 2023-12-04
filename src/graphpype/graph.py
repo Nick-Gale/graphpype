@@ -21,8 +21,8 @@ def louvainCommunities(G, seed: int, cuda=False):
     """A simple wrapper for the default parameters of the NetworkX implementation of the Louvain Clustering algorithm. The graph is weighted by the adjacency matrix and the seed must by specified according to the recipe."""
 
     # need to add support for GPU acceleration through cugraph
-    
-    return networkx.community.louvain_communities(G, seed=seed)
+    res = networkx.algorithms.community.louvain.louvain_communities(G, seed=seed) #  networkx.community.louvain_communities(G, seed=seed)
+    return res
 
 def greedyModules(G):
     """A simple wrapper for a greedy community detection algorithm using modularity maximisation."""
@@ -163,5 +163,5 @@ def randomCommunityStochasticBlock(g, communities, density=0.1, nGraphs=1000, se
     sz = [len(i) for i in communities]
     p = density * numpy.ones((len(sz), len(sz)))
     graphs =  [networkx.generators.community.stochastic_block_model(sz, p, seed=(seed + i)) for i in range(nGraphs)] 
-    communities = [networkx.algorithms.community.louvain.louvain_communities(i, seed=seed) for i in graphs]
+    communities = [networkx.algorithms.community.louvain.louvain_communities(i, seed=(seed + s)) for s, i in enumerate(graphs)]
     return communities

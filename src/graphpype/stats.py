@@ -10,26 +10,18 @@ def estimateDistancePermutation(graph, distanceDist):
     err = scipy.stats.sem(dist)
     return dist, av, err
 
-def modularOverlap(*modules):
+def modularOverlap(modules1, modules2):
     """Given a vector of module membership of nodes compute the modular overlap and return a z-transformed score. To compute the modular overlap compute the fraction of pairs of nodes that share a module in both groups i.e. a binary vector. Note: this is not a symetric relationship between partitions as the vectors will have different lengths based on which is chosen first. Return the mean/std of the vector."""
-    L = len(modules)
-    modules = [[sorted(k) for k in i] for i in modules]
-    statistic = numpy.zeros((L, L))
-    for qi in range(L):
-        for qj in range(L):
-            membership = 0
-            totalCount = 0
-            for mod in modules[qi]:
-                for i in range(len(mod)-1):
-                    for j in range(i+1, len(mod)):
-                        t = [((mod[i] in modules[qj][x]) and (mod[j] in modules[qj][x])) for x in range(len(modules[qj]))]
-                        membership += int(any(t))
-                        totalCount += 1
-                if len(mod) == 1:
-                    membership += 1
-                    totalCount += 1
-            statistic[qi, qj] = membership / totalCount 
-    return numpy.mean(statistic.flatten())
+    modules = [[sorted(k) for k in i] for i in [modules1, modules2]]
+    statistic = 0 
+    for modi in modules[0]:
+        for modj in modules[1]:
+            N = len(numpy.intersect1d(modi, modj)) # nodes in modi that share a module classification in the second graph
+            npairs = N * (N - 1) / 2 # number of pairs that can be made with these nodes
+            statistic += npairs
+    nNodes = max([max(k) for k in modules[0]])
+    totalPairs = nNodes * (nNodes - 1) / 2
+    return statistic / totalPairs
 
 def modularZTest(*modules):
     """ """
@@ -38,8 +30,11 @@ def modularZTest(*modules):
     for i in range(L):
         dist = [modularOverlap(modules[i][0], k) for k in modules[i][1]]
         for j in range(L):
-            measured = modularOverlap(modules[i][0], modules[j][0])
-            zstats[i,j] = abs(numpy.mean(dist) - measured) / numpy.std(dist)
+            if i == j:
+                zstats[i, j] = -1
+            else:
+                measured = modularOverlap(modules[i][0], modules[j][0])
+                zstats[i,j] = abs(numpy.mean(dist) - measured) / numpy.std(dist)
     return zstats
 
 def pairgroupModularZTest(*modules, correction="FDR", threshold=0.025):
@@ -106,8 +101,11 @@ def compareGroupDegreeMeans(*data, channel="", correction="FDR", threshold=0.05)
             else:
                 pvals = numpy.zeros(len(means[i]))
                 for k in range(len(means[i])):
-                    pvals[k] = scipy.stats.ttest_ind(groups[i][:,k], groups[j][:, k]).pvalue
-                
+                    # check that the distributions aren't identical, else give a pval of 1
+                    if all(groups[i][:, k] == groups[j][:, k]):
+                        pvals[k] = 1
+                    else:
+                        pvals[k] = scipy.stats.ttest_ind(groups[i][:,k], groups[j][:, k]).pvalue
                 
             nans = numpy.isnan(pvals)
             if any(nans):
@@ -178,15 +176,18 @@ def covarianceMatrix(*data, normalise=True):
 
     for i in range(L):
         for j in range(L):
-            if y == 1:
-                mat[i,j] = covmat[i,j]
+            if i ==j:
+                mat[i,j] = 0
             else:
-                vi = utils.vectorSlice(dataMat, i, 2)
-                vj = utils.vectorSlice(dataMat, j, 2)
-                if normalise:
-                    mat[i, j] = scipy.stats.pearsonr(vi, vj).statistic
+                if y == 1:
+                    mat[i,j] = covmat[i,j]
                 else:
-                    mat[i, j] = numpy.cov(vi, vj)[0][1]
+                    vi = utils.vectorSlice(dataMat, i, 2)
+                    vj = utils.vectorSlice(dataMat, j, 2)
+                    if normalise:
+                        mat[i, j] = scipy.stats.pearsonr(vi, vj).statistic
+                    else:
+                        mat[i, j] = numpy.cov(vi, vj)[0][1]
 
     return mat
 
@@ -245,8 +246,8 @@ def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[
         assert len(fitData) == 2, "There should only only be two arrays: covariates and regressors"
         
         assert numpy.shape(fitData[0])[0] == numpy.shape(fitData[1])[0], "The covariates and regressors should have the same number of data points."
-        
-        return statsmodels.regression.linear_model.OLS(fitData[0], statsmodels.tools.tools.add_constant(fitData[1])).fit()
+        import statsmodels.api as sm 
+        return sm.OLS(fitData[0], statsmodels.tools.tools.add_constant(fitData[1])).fit()
 
     else:
         # regressing on multiple datasets

@@ -43,27 +43,36 @@ class Pipeline:
                 [datasets.append(DataSet(i, [])) for i in self.recipe.nodes if "load" in i.channelsIn]
         
         analysisSet = DataSet(dataObjs=datasets)
-        
         # process: check cache
         #           process nodes
         #           cache
+        
+
         if "preProcess" in pipe.recipe.nodes:
             # do the preprocessing that needs to be applied to the whole data set (e.g. loading already preprocessed data)
             ops = [o for o in pipe.recipe.nodes["preProcess"] if o.internal["totalAnalysisPreProcessing"]]
-            _process(ops, [analysisSet], pipe.recipe.env["nThreads"])
-
+            res =  _process(ops, [analysisSet], pipe.recipe.env["nThreads"])
+            if res:
+                analysisSet = res[0]
+             
         if "postProcess" in pipe.recipe.nodes:
             ops = pipe.recipe.nodes["postProcess"]
-            _process(ops, datasets, pipe.recipe.env["nThreads"])
+            res = _process(ops, analysisSet.data, pipe.recipe.env["nThreads"])
+            if res:
+                analysisSet.data = res
         
         if "analysis" in pipe.recipe.nodes:
             ops = pipe.recipe.nodes["analysis"]
-            _process(ops, datasets, pipe.recipe.env["nThreads"])
+            res = _process(ops, analysisSet.data, pipe.recipe.env["nThreads"])
+            if res:
+                analysisSet.data = res 
         
         if "postAnalysis" in pipe.recipe.nodes:
             ops = pipe.recipe.nodes["postAnalysis"]
-            _process(ops, [analysisSet], pipe.recipe.env["nThreads"])
-        
+            res = _process(ops, [analysisSet], pipe.recipe.env["nThreads"])
+            if res:
+                analysisSet = res[0]
+
         pipe.result = analysisSet
         processingFinish = time.time()
         print(f"Total processing time: {processingFinish - processingStart} seconds")
@@ -337,7 +346,7 @@ class Operator:
                     data.postData[self.channelOut[c]] = res
 
         
-    def __call__(self, data=DataSet):
+    def __call__(self, data=DataSet, ret=True):
         if self.packageDir == "":
             pkg = importlib.import_module(self.basePackage)
         else:
@@ -371,7 +380,6 @@ class Operator:
                     d = data.data
             else:
                 raise NameError("There is no valid layer by that name.")
-
         if "broadcast" in self.internal:
             # always broadcast over the first provided channel
             res = []
@@ -405,6 +413,9 @@ class Operator:
                 if self.channelOut[c] != []: # empty channels should not through errors or write results
                     data.analysis[self.channelOut[c][0]] = res
 
+        if ret:
+            return data
+
 # TO DO
 
 # Functions
@@ -422,16 +433,29 @@ def _preprocess(recipe, bidsdir):
             cmdStr =[k + v for (k, v) in i["arguments"]].prepend(i["name"])
             sp.run(cmdStr)
 
-def _process(ops, dataset, parallel: int):
-    if parallel > 1:
-        import multiprocessing as mp
-        pool_obj = mp.Pool(parallel)
-        pool_obj.map(ops, dataset)
-        #for i in ops:
-        #    pool_obj.map(i, dataset) # check that this is memory safe
+def _process(ops, dataset, nthreads: int, pool=None):
+    if nthreads > 1:
+      #  import multiprocessing
+      #  for f in ops:
+      #     if f.name != 'plots': ## Change this to env["nonparallel"]
+      #          lambdaF = lambda x: f(x)
+      #          pool.map(f, dataset)
+      #      else:
+      #          [f(d) for d in dataset]
+
+        from joblib import Parallel, delayed, cpu_count
+        from joblib.externals.loky import set_loky_pickler
+        set_loky_pickler('pickle')
+        pool = Parallel(n_jobs=-1, prefer='threads', backend='multiprocessing')
+        for f in ops:
+            if f.name != 'plots': ## Change this to env["nonparallel"]
+                dataset = pool(delayed(f)(d, ret=True) for d in dataset)
+            else:
+                [f(d) for d in dataset]
+        return dataset
     else:
         for d in dataset:            
-            [f(d) for f in ops]
+            [f(d, ret=False) for f in ops]
 
 
             

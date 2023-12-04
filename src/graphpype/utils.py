@@ -37,6 +37,7 @@ def loadAnalysisChannel(*totalDataset, dataDirectory="", channel="", dataType="c
             data = open(dataDirectory)
     for i in totalDataset:
         i.analysis[channel] = data
+    return None
 
 def distanceMat(data):
     L = len(data)
