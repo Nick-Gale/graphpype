@@ -1,0 +1,8 @@
+numpy
+scipy
+nilearn
+pandas
+matplotlib
+networkx
+statsmodels
+neuromaps

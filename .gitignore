@@ -1,3 +1,5 @@
+tarball.sh
+venv/*
 data/*
 scripting/*
 pseudocode.md

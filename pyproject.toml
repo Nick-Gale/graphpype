@@ -1,32 +1,29 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
 [project]
-name = "neuroGraphPype"
-
+name = "graphpype"
 description = "Streamlining and automating network analysis with a focus on neuroimaging data."
-
-version = "0.1.0"
-
-authors = [
-	{ name = "Nicholas M. Gale", email = "nick.gale1993@gmail.com" }
-]
-
+version = "0.0.1"
+authors = [{ name = "Nicholas M. Gale", email = "nick.gale1993@gmail.com" }]
 readme = "README.md"
-
 requires-python = ">=3.8"
-
 dependencies = [
 	"numpy",
 	"scipy",
 	"nilearn",
 	"pandas",
 	"matplotlib",
-	"networkx"
-]
-
-[project.optional.dependencies]
-dev = [
-	"tensorflow"
+	"networkx",
+	"statsmodels", 
+	"neuromaps"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/Nick-Gale/NetworkAnalysis"
 
+[tool.setuptools.packages.find]
+where=["src"]
+include=["graphpype"]

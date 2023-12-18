@@ -1,0 +1,28 @@
+Metadata-Version: 2.1
+Name: graphpype
+Version: 0
+Summary: Streamlining and automating network analysis with a focus on neuroimaging data.
+Author-email: "Nicholas M. Gale" <nick.gale1993@gmail.com>
+Project-URL: Homepage, https://github.com/Nick-Gale/NetworkAnalysis
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: nilearn
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: networkx
+Requires-Dist: statsmodels
+Requires-Dist: neuromaps
+
+# NetworkAnalysis
+An analysis pipeline for complex network data focusing on brain imaging data.
+
+## Installation
+
+### Dependencies
+
+## Basic Usage
+
+## Documentation
