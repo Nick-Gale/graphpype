@@ -9,4 +9,5 @@ venv/*
 data/*
 scripting/*
 pseudocode.md
+pyvenv.cfg
 changelog.md
