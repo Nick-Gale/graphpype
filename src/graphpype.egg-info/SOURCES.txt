@@ -2,10 +2,9 @@
 LICENSE
 README.md
 __init__.py
-changelog.md
-pseudocode.md
+editableInstall.sh
 pyproject.toml
-setup.py
+dist/v0/graphpype-v0.tar.gz
 src/graphpype/__init__.py
 src/graphpype/graph.py
 src/graphpype/pipe.py

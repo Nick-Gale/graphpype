@@ -274,39 +274,15 @@ def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[
                     else:
                         raise("Please address the data by a named index, or an integer corresponding to the linear index of the dataset")
                     
-
-                    match test:
-                    # Arrange data and fit
-                        case 'none':
-                            regressors = numpy.array([getattr(d, c) for c in regressorChannels for d in dataX])
-                            covariates = numpy.array([getattr(d, c) for c in covariateChannels for d in dataY])
-                            if link==None:    
-                                glm = statsmodels.OLS(regressors, covariates).fit()
-                            else:
-                                linkfamily = getattr(statsmodels.families, link)
-                                glm = statsmodels.GLM(regressors, covariates, family=linkfamily).fit()
-                            
-                            fit[x][y]["model"] = glm
-
-                        case 'ttest':
-                            assert dataX.shape[1] == dataY.shape[1], "The data must have the same feature dimension for a two sided t-test"
-                            
-                            # split into two cases for multiple data: either testing generic vector mean between two datasts, or lots of different categorical means within data set (needs correction)
-
-                            prediction = numpy.concat([dataX, dataY], axis=1)
-                            dummyMask = numpy.concat([numpy.zeros(dataX.shape[0]), numpy.ones(dataY.shape[0])], axis=0)
-                            model = statsmodels.OLS(dummyMask, prediction).fit()
-                            fit[x][y]["t-Stastic"] = model.tvalues[1]
-                            fit[x][y]["pValue"] = model.pvalues[1] 
-                            
-                        case 'anova':
-                            return None
-                            
-                        
-                        case 'ancova':
-                            return None
-
-
+                    regressors = numpy.array([getattr(d, c) for c in regressorChannels for d in dataX])
+                    covariates = numpy.array([getattr(d, c) for c in covariateChannels for d in dataY])
+                    if link==None:    
+                        glm = statsmodels.OLS(regressors, covariates).fit()
+                    else:
+                        linkfamily = getattr(statsmodels.families, link)
+                        glm = statsmodels.GLM(regressors, covariates, family=linkfamily).fit()
+                    
+                    fit[x][y]["model"] = glm
         return fit
 
         

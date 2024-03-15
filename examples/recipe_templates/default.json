@@ -1,0 +1,473 @@
+{
+    "name": "Reproduction study of the paper: Structural Covariance Networks in Children with Autism or ADHD",
+    "description": "This recipe attempts to reproduce the papers graph theoretical analysis. The preprocessing steps are assumed to be conducted flawlessly and there is no reference to individual data points, only group-wise adjacency matrices are considered. Unless otherwise stated all statistical tests are assumed to be a derivative of the General Linear Model and errors are thus distributed normally.",
+    "nodes": {
+        "preProcess": [
+            {
+                "function": {
+                    "name": "loadParcellation",
+                    "package": "graphpype.utils",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "preProcess": []
+                    },
+                    "resultIndex": {
+                        "analysis": []
+                    }
+                },
+                "args": {
+                    "dataDirectory": "./data/ct.npy",
+                    "listFilterDirectory": "./data/group.txt",
+                    "channel": "cortical",
+                    "nameFilter": true
+                },
+                "inter": {
+                    "totalAnalysisPreProcessing": true
+                }
+            },
+            {
+                "function": {
+                    "name": "loadAnalysisChannel",
+                    "package": "graphpype.utils",
+                    "version": "0.0.1",
+                    "local": 0
+                },
+                "channels": {
+                    "dataIndex": {
+                        "preProcess": []
+                    },
+                    "resultIndex": {
+                        "analysis": []
+                    }
+                },
+                "args": {
+                    "dataDirectory": "./data/centroids_500.csv",
+                    "dataType": "csv",
+                    "channel": "distances"
+                },
+                "inter": {
+                    "totalAnalysisPreProcessing": true
+                }
+            }
+        ],
+        "postProcess": [
+            {
+                "function": {
+                    "name": "covarianceMatrix",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "preProcess": [
+                            "cortical"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "covariance"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "loadFeature",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "preProcess": [
+                            "cortical"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "thickness"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {}
+            }
+        ],
+        "analysis": [
+            {
+                "function": {
+                    "name": "distanceMat",
+                    "package": "graphpype.utils",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "distances"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "distanceMat"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "constructMinSpanDensity",
+                    "package": "graphpype.graph",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "covariance"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "graph"
+                        ]
+                    }
+                },
+                "args": {
+                    "density": 0.1
+                },
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "constructedDensityPermutationGraph",
+                    "package": "graphpype.graph",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "covariance"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "randomGraph"
+                        ]
+                    }
+                },
+                "args": {
+                    "density": 0.1,
+                    "nPermutations": 100,
+                    "seed": 0
+                },
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "degreeCDF",
+                    "package": "graphpype.graph",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "graph"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "degreeDistribution"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "degreeCDF",
+                    "package": "graphpype.graph",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "randomGraph"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "distDegreeDistribution"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {
+                    "broadcast": true,
+                    "split": true
+                }
+            },
+            {
+                "function": {
+                    "name": "louvainCommunities",
+                    "package": "graphpype.graph",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "graph"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "louvain"
+                        ]
+                    }
+                },
+                "args": {
+                    "seed": 0
+                },
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "randomCommunityStochasticBlock",
+                    "package": "graphpype.graph",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "graph",
+                            "louvain"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "randomCommunity"
+                        ]
+                    }
+                },
+                "args": {
+                    "nGraphs": 100,
+                    "seed": 0
+                },
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "featureDegreeDistribution",
+                    "package": "graphpype.graph",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "graph",
+                            "thickness"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "thicknessDegreeDist"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {
+                    "split": true
+                }
+            },
+            {
+                "function": {
+                    "name": "estimateDistancePermutation",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "graph",
+                            "distances"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "connectedDistDistribution"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "generalLinearModel",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "covariance",
+                            "distanceMat"
+                        ]
+                    },
+                    "resultIndex": {
+                        "analysis": [
+                            "r2distanceFit"
+                        ]
+                    }
+                },
+                "args": {
+                    "sets": []
+                },
+                "inter": {}
+            }
+        ],
+        "postAnalysis": [
+            {
+                "function": {
+                    "name": "compareGroupDegreeMeans",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "distDegreeDistribution1"
+                        ]
+                    },
+                    "resultIndex": {
+                        "postAnalysis": [
+                            "significantDegrees"
+                        ]
+                    }
+                },
+                "args": {
+                    "threshold": 0.025
+                },
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "modularZTest",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "louvain",
+                            "randomCommunity"
+                        ]
+                    },
+                    "resultIndex": {
+                        "postAnalysis": [
+                            "modularOverlap"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "pairgroupModularZTest",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "louvain",
+                            "randomCommunity"
+                        ]
+                    },
+                    "resultIndex": {
+                        "postAnalysis": [
+                            "groupModularOverlap"
+                        ]
+                    }
+                },
+                "args": {},
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "multipleTTest",
+                    "package": "graphpype.stats",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "analysis": [
+                            "thicknessDegreeDist0",
+                            "thicknessDegreeDist1",
+                            "thicknessDegreeDist2"
+                        ]
+                    },
+                    "resultIndex": {
+                        "postAnalysis": [
+                            "significantThickness"
+                        ]
+                    }
+                },
+                "args": {
+                    "threshold": 0.025
+                },
+                "inter": {}
+            },
+            {
+                "function": {
+                    "name": "plots",
+                    "package": "graphpype.utils",
+                    "local": 0,
+                    "version": "0.0.1"
+                },
+                "channels": {
+                    "dataIndex": {
+                        "postAnalysis": []
+                    },
+                    "resultIndex": {
+                        "postAnalysis": [
+                            "plots"
+                        ]
+                    }
+                },
+                "args": {
+                    "plotsDir": "./plots.py"
+                },
+                "inter": {
+                    "totalDataSet": true
+                }
+            }
+        ]
+    },
+    "env": {
+        "nThreads": 3,
+        "seed": 1
+    }
+}

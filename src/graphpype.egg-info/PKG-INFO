@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: graphpype
-Version: 0
+Version: 0.0.1
 Summary: Streamlining and automating network analysis with a focus on neuroimaging data.
 Author-email: "Nicholas M. Gale" <nick.gale1993@gmail.com>
 Project-URL: Homepage, https://github.com/Nick-Gale/NetworkAnalysis

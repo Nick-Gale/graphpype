@@ -1,6 +1,6 @@
 # Submodule: pipelines. Functions dedicated to constructing pipelines: pre-processing, processing, plotting, and end-to-end functionality.
 import importlib, warnings, os, time
-import subprocess as sp
+import subprocess 
 # Constants
 
 # Classes
@@ -10,37 +10,53 @@ class Pipeline:
     recipe: any
     paths: list
     result: any
-    def __init__(self, recipeDir, *bids):
+    def __init__(self, recipeDir, bids = {}):
+
         recipe = Recipe()
         recipe.read(recipeDir)
         self.recipe = recipe
         
         # for each dataset directory find the subject folder names
-        subjPaths = []
+        subjPaths = {}
         if bids:
-            for i in bids:
-                subjPaths.append( [ f.path for f in os.scandir(i) if f.is_dir() and f.path[0:4] == 'sub-' ] )
-            
+            for (dataSetName, directory) in bids.items():
+                subjPaths[dataSetName] = [ f.path for f in os.scandir(directory) if f.is_dir() and f.path[0:4] == 'sub-' ]
+            subjPaths[dataSetName].insert(0, directory)
         self.paths = subjPaths
 
     def process(pipe, dataSetNames=[], preProcess=True):
         processingStart = time.time()
         datasets = []
         if preProcess:
-            for i in self.paths:
-                _preprocess(recipe, i)
+            for (dataSetName, paths) in pipe.paths.items():
+                _preprocess(pipe.recipe, paths[0])
             
             # construct dataset THIS NEEDS TO BE FIXED
-            for s in pipe.recipe.paths:
-                ds = [Datum(j) for j in s]
-                datasets.append(DataSet(dataObjs=ds))
+            for (dataSetName, paths) in pipe.paths.items():
+                # since the data is preprocessed it needs to be in the derivatives folder and paths must be accordingly modified
+                
+                directory = paths[0] + "derivatives/"
+                dataPaths = [ f.path for f in os.scandir(directory) if f.is_dir() and f.path[len(directory):][0:4] == 'sub-' ]
+                ds=[]
+                for p in dataPaths:
+                    dirsP = []
+                    for o in pipe.recipe.nodes["preProcess"]:
+                        channel = o.channelOut["preProcess"][0]
+                        if "stringAdd" in o.arguments:
+                            string = p + o.arguments["stringAdd"]
+                        else:
+                            string = p
+                        dirsP.append({"channel": channel, "string": string})
+                    ds.append(Datum(*dirsP))
+
+                datasets.append(DataSet(name=dataSetName, dataObjs=ds))
         
         else:
             if dataSetNames:
                 [datasets.append(DataSet(name=i, dataObjs=[])) for i in dataSetNames]
             else:
                 ### CHECK THIS
-                [datasets.append(DataSet(i, [])) for i in self.recipe.nodes if "load" in i.channelsIn]
+                [datasets.append(DataSet(i, [])) for i in pipe.recipe.nodes if "load" in i.channelsIn]
         
         analysisSet = DataSet(dataObjs=datasets)
         # process: check cache
@@ -50,7 +66,7 @@ class Pipeline:
 
         if "preProcess" in pipe.recipe.nodes:
             # do the preprocessing that needs to be applied to the whole data set (e.g. loading already preprocessed data)
-            ops = [o for o in pipe.recipe.nodes["preProcess"] if o.internal["totalAnalysisPreProcessing"]]
+            ops = [o for o in pipe.recipe.nodes["preProcess"] if "totalAnalysisPreProcessing" in o.internal]
             res =  _process(ops, [analysisSet], pipe.recipe.env["nThreads"])
             if res:
                 analysisSet = res[0]
@@ -180,14 +196,24 @@ class Datum:
         
         # split the directories to find the relevant information
         for d in directories:
-            channel = d["channel"]
 
+            channel = d["channel"]
             if channel == "Gene":
                 import numpy as np
                 data = np.load(d["string"])
-            elif channel == "fMRI":
-                import nibabel as nib
-                data = nib.load(d["string"]).get_fdata()
+            elif channel == "fMRI" or channel == "fmri" or channel == "FMRI":
+                allNiFTi = [ f.path for f in os.scandir(d["string"]) if f.path[-6:] == 'nii.gz' ]
+                import nibabel 
+                if d["string"][-1] == '/':
+                    print("No specific file selected in data subdirectory, choosing the NIFTI .gz found at the 0'th index of a string matched to `desc-preproc_bold.nii.gz`")
+                    target = 'desc-preproc_bold.nii.gz'
+                    preProcessedString = [s for s in allNiFTi if s[-len(target):] == target][0]
+                    data = nibabel.load(preProcessedString).get_fdata()
+                else:
+                    assert d["string"][-6:] == 'nii.gz', "Please enter a valid NIFTI archive file"
+                    data = nibabel.load(d["string"] + '/nifti.gz').get_fdata()
+                
+                
             elif channel == "Random":
                 from numpy.random import rand
                 data = rand(5,2,4,10)
@@ -298,12 +324,25 @@ class Operator:
                 else:
                     warnings.warn("Couldn't find a version for the function being called: setting version to 0.0.0", UserWarning)
                     self.version = "0.0.0"
-
-        self.arguments = args
+        
+        # grab all the defaults of the particular function that aren't included in arguments
+        f = getattr(pkg, self.name)
+        if f.__defaults__==None:
+            full_args = {}
+        else:
+            full_args = dict(zip(f.__code__.co_varnames[-len(f.__defaults__):], f.__defaults__))
+        
+        shared_keys = tuple(full_args.keys() and args.keys())
+        
+        # change the default arguments to the user specified ones
+        for key in shared_keys:
+            full_args[key] = args[key]
+        
+        self.arguments = full_args
         
         self.internal = inter
         self.json = {"function": function, "channels": channels, "args": args, "inter": inter} 
-    def __call__(self, data=Datum):
+    def __call__(self, data, ret=True):
         """The operator can be used to operate on a datum by specifying the data layers and channels. The data will be stored in a strictly ordered vector which will be passed as a tuple to the function which defines the operator with the order being inherited from the order used to specify the channels. The result is stored in a single channel in a layer specified by the `channelOut` field."""
 
         if self.packageDir == "":
@@ -312,109 +351,106 @@ class Operator:
             pkg = importlib.import_module(self.basePackage + "." + self.packageDir)
         f = getattr(pkg, self.name)
         
-        d = []
-        for i in self.channelsIn:
-            if i == "preData":
-                for g in self.channelsIn[i]:
-                    d.append(data.preData[g])
-            elif i == "postData":
-                for g in self.channelsIn[i]:
-                    d.append(data.postData[g])
-            else:
-                raise NameError("There is no valid layer by that name.")
-        
-        if self.internal["broadcast"]:
-            # always broadcast over the first provided channel
-            for i in range(d[0]):
-                v = [d[x][i % len(d[x])] for x in d]
-                res = f(*v, **self.arguments)
-        else:
-            if self.arguments["unnamed"]:
-                v = self.arguments["unnamed"]
-                res = f(*d, *v, **self.arguments)
-            else:    
-                res = f(*d, **self.arguments)
-        
-        for c in self.channelOut:
-            if c == "preData":
-                data.preData[self.channelOut[c]] = res
-            if c == "postData":
-                if inter["split"]:
-                    for i in range(len(res)):
-                        data.postData[self.channelOut[c] + str(i) ] = res[i]
-                else:
-                    data.postData[self.channelOut[c]] = res
-
-        
-    def __call__(self, data=DataSet, ret=True):
-        if self.packageDir == "":
-            pkg = importlib.import_module(self.basePackage)
-        else:
-            pkg = importlib.import_module(self.basePackage + "." + self.packageDir)
-        f = getattr(pkg, self.name)
-        
-        for i in self.channelsIn:
+        if type(data) == Datum:
             d = []
-            if i == "preProcess":
-                if "totalAnalysisPreProcessing" in self.internal and self.internal["totalAnalysisPreProcessing"]:
-                    d = data.data
+            for i in self.channelsIn:
+                if i == "preData":
+                    for g in self.channelsIn[i]:
+                        d.append(data.preData[g])
+                elif i == "postData":
+                    for g in self.channelsIn[i]:
+                        d.append(data.postData[g])
                 else:
-                    d = [[x.preData[g] for g in self.channelsIn[i]] for x in data.data]
-  
-            elif i == "postProcess":
-                d = [[x.postData[g] for g in self.channelsIn[i]] for x in data.data]
-
-            elif i == "analysis":
-                ### TO DO: ensure this works for a single data set as well as a list of datasets (recommended)
-                if "postAnalysis" in self.channelOut:
-                    if len(self.channelsIn[i]) == 1:
-                        d = [j.analysis[g] for g in self.channelsIn[i] for j in data.data]
+                    raise NameError("There is no valid layer by that name.")
+            
+            if self.internal["broadcast"]:
+                # always broadcast over the first provided channel
+                for i in range(d[0]):
+                    v = [d[x][i % len(d[x])] for x in d]
+                    res = f(*v, **self.arguments)
+            else:
+                if self.arguments["unnamed"]:
+                    v = self.arguments["unnamed"]
+                    res = f(*d, *v, **self.arguments)
+                else:    
+                    res = f(*d, **self.arguments)
+            
+            for c in self.channelOut:
+                if c == "preData":
+                    data.preData[self.channelOut[c]] = res
+                if c == "postData":
+                    if inter["split"]:
+                        for i in range(len(res)):
+                            data.postData[self.channelOut[c] + str(i) ] = res[i]
                     else:
-                        d = [[j.analysis[g] for g in self.channelsIn[i]] for j in data.data]
-                else:
-                    d = [data.analysis[g] for g in self.channelsIn[i]]
-            elif i == "postAnalysis":
-                if self.internal["totalDataSet"]:
-                    d = [data]
-                else:
-                    d = data.data
-            else:
-                raise NameError("There is no valid layer by that name.")
-        if "broadcast" in self.internal:
-            # always broadcast over the first provided channel
-            res = []
-            for i in range(len(d[0])):
-                v = [x[i % len(x)] for x in d]
-                res.append(f(*v, **self.arguments))
-        else:
-            if "unnamed" in self.arguments:
-                v = self.arguments["unnamed"]
-                named = self.arguments.copy()
-                named.pop("unnamed", 'None')
-                if d:
-                    res = f(*d, *v, **named)
-                else:
-                    res = f(*v, **named)
-            else:
-                res = f(*d, **self.arguments)
+                        data.postData[self.channelOut[c]] = res
         
-        for c in self.channelOut:
-            if "split" in self.internal and self.internal["split"] == True:
-                if "broadcast" in self.internal:
-                    step = len(res[0])
-                    for i in range(step):
-                        data.analysis[self.channelOut[c][0] + str(i)] = [r[i] for r in res]
-                else:
-                    for i in range(len(res)):
-                        data.analysis[self.channelOut[c][0] + str(i)] = res[i]
-            else:
-                assert len(self.channelOut[c]) <= 1, "Multichannel output not yet supported"
-                
-                if self.channelOut[c] != []: # empty channels should not through errors or write results
-                    data.analysis[self.channelOut[c][0]] = res
+        elif type(data) == str:
+            f(data, **self.arguments)
+        
+        elif type(data) == DataSet: 
+            for i in self.channelsIn:
+                d = []
+                if i == "preProcess":
+                    if "totalAnalysisPreProcessing" in self.internal and self.internal["totalAnalysisPreProcessing"]:
+                        d = data.data
+                    else:
+                        d = [data]
+  
+                elif i == "postProcess":
+                    d = [[x.postData[g] for g in self.channelsIn[i]] for x in data.data]
 
-        if ret:
-            return data
+                elif i == "analysis":
+                    ### TO DO: ensure this works for a single data set as well as a list of datasets (recommended)
+                    if "postAnalysis" in self.channelOut:
+                        if len(self.channelsIn[i]) == 1:
+                            d = [j.analysis[g] for g in self.channelsIn[i] for j in data.data]
+                        else:
+                            d = [[j.analysis[g] for g in self.channelsIn[i]] for j in data.data]
+                    else:
+                        d = [data.analysis[g] for g in self.channelsIn[i]]
+                elif i == "postAnalysis":
+                    if self.internal["totalDataSet"]:
+                        d = [data]
+                    else:
+                        d = data.data
+                else:
+                    raise NameError("There is no valid layer by that name.")
+            if "broadcast" in self.internal:
+                # always broadcast over the first provided channel
+                res = []
+                for i in range(len(d[0])):
+                    v = [x[i % len(x)] for x in d]
+                    res.append(f(*v, **self.arguments))
+            else:
+                if "unnamed" in self.arguments:
+                    v = self.arguments["unnamed"]
+                    named = self.arguments.copy()
+                    named.pop("unnamed", 'None')
+                    if d:
+                        res = f(*d, *v, **named)
+                    else:
+                        res = f(*v, **named)
+                else:
+                    res = f(*d, **self.arguments)
+            
+            for c in self.channelOut:
+                if "split" in self.internal and self.internal["split"] == True:
+                    if "broadcast" in self.internal:
+                        step = len(res[0])
+                        for i in range(step):
+                            data.analysis[self.channelOut[c][0] + str(i)] = [r[i] for r in res]
+                    else:
+                        for i in range(len(res)):
+                            data.analysis[self.channelOut[c][0] + str(i)] = res[i]
+                else:
+                    assert len(self.channelOut[c]) <= 1, "Multichannel output not yet supported"
+                    
+                    if self.channelOut[c] != []: # empty channels should not through errors or write results
+                        data.analysis[self.channelOut[c][0]] = res
+
+            if ret:
+                return data
 
 # TO DO
 
@@ -426,12 +462,14 @@ def _preprocess(recipe, bidsdir):
     
     assert "preProcess" in recipe.nodes, "You need to specify the preprocessing operations." 
     
-    ops = recipes.nodes["preProcess"]
-    
+    ops = recipe.nodes["preProcess"]
     for i in ops:
-        if i[packageDir]["cmd"]:
-            cmdStr =[k + v for (k, v) in i["arguments"]].prepend(i["name"])
-            sp.run(cmdStr)
+        if i.basePackage == "cmd":
+            cmdStr =[k + v for (k, v) in i.arguments.items()][0].split()
+            subprocess.run(cmdStr)
+        else:
+            # the bidsdir includes all names of the subject paths as elements of a vector; the first element of the vector is the root of the data directory
+            [f(bidsdir) for f in ops]
 
 def _process(ops, dataset, nthreads: int, pool=None):
     if nthreads > 1:

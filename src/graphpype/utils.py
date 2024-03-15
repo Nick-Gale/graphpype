@@ -1,5 +1,85 @@
-import sys, os, numpy
+import sys, os, numpy, subprocess, pickle, inspect, shutil
 from graphpype import pipe
+
+def generateTemplate(name="generic", exampleFile="generic.py"):
+    """Generates a fill-in-the-blanks template to work with. This is generally easier than remembering all the particular details about how operators (and in particular some common Operators) should be specified. Writes the recipe immediately to the name specified and the recipe exists in the python session and can be dynamically edited.
+
+    Usage notes: if dynamically editing in Python remember to call pipe.write("someRecipeName.json")"""
+
+    rootDIR = Path(__file__).parent.parent.parent
+    exampleDIR = rootDIR + '/' + exampleFile
+    currentDir = os.getcwd()
+
+    shutil.copyfile(exampleDir, currentDir + '/' + name + '.py')
+    
+    exec(open('filename').read())
+
+    pipe.write(name + ".json")
+    
+    return recipe
+
+def fetchAtlas(atlas="msdl", atlasDir="./data/atlases/"):
+    "Grabs an atlas using the NiLearn API. The default atlas used is the msdl atlas but this can be specified to work with any atlas available in the NiLearn database."
+    # check the atlas exists
+    if os.path.exists(atlasDir + atlas):
+        atlasObj = loadObj(atlasDir + atlas)
+    else
+        # fetch the atlas and labels
+        funcStr = "datasets.fetch_atlas_" + atlas
+        funcFetch = getattr(nilearn, funcStr)
+        atlasObj = funcFetch()
+        # seperate the regions into spatially continuous blocks (no left-right hemisphere symettery for example)
+        atlasObj = connected_label_regions(atlasObj)
+        # atlasMaps = atlasObj["maps"]
+        # atlasLabels = atlas["labels"]
+        
+        saveObj(atlasObj, atlasDir)
+
+    return atlasObj
+
+def fmriprep(directory, fmriprep=[], participant=[], cache=True, stringAdd=""):
+    # modify directory to be BIDS and terminal compliant:
+    if directory[-1] != '/':
+        directory += '/'
+    derivativesDirectory = directory + 'derivatives/'
+    
+    # find the participant labels
+    subsDerivative = [ f.path[len(derivativesDirectory):] for f in os.scandir(derivativesDirectory) if f.is_dir() and f.path[len(derivativesDirectory):][0:4] == 'sub-' ]
+    subs = [ f.path[len(directory):] for f in os.scandir(directory) if f.is_dir() and f.path[len(directory):][0:4] == 'sub-' ]
+    
+    # if no participants are labelled presume all participants are selected
+    if participant == []:
+        participant = [i for i in subs]
+    
+    # once there is a non empty specification of participants refine the subs paths
+    if type(participant[0]) == int:
+        subsPaths = [subs[i] for i in participant]
+    else:
+        subsPaths = participant
+    
+    # check the derivatives directory for participants that have already been processed
+    if cache:
+        subsProcess = [i for i in subsPaths if i not in subsDerivative]
+    else:
+        subsProcess = subsPaths
+    
+    # a non-empty subsProcess should be passed to fmriprep, else cache has been selected
+    if subsProcess: 
+        cmdStr = ["fmriprep-docker", directory, derivativesDirectory, "participant"] + fmriprep + ["--participant-label"] + subsPaths
+        subprocess.run(cmdStr)
+    else:
+        print("Previously preprocessed participants have been detected in the BIDS/derivatives/ directory. These will be selected as the `cache` option is True. To reprocess these set `cache=False`")
+
+    return None
+
+def loadObject(directory):
+    with open(directory, 'wb') as file:  # Overwrites any existing file.
+        obj = pickle.load(file)
+    return obj
+
+def saveObject(obj, directory):
+    with open(directory, 'wb') as output:  # Overwrites any existing file.
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
 
 def loadParcellation(*totalDataset, dataDirectory="", listFilterDirectory="", channel="", nameFilter=False):
     "Loading a combined dataset which has a specific parcellation and is filtered into subdatasets according to a filter list. If listFilter is empty then all parcellations are loaded into the data field of the combined dataset; else load each parcellation into the data field of the indexed data entry in the combined dataset indexed by name if provided else by order. Expects a matrix of floats, a (possibly empty) list of strings, and a dataset."
