@@ -1,5 +1,9 @@
 todo.md
 
+bin/*
+lib64/*
+lib/*
+
 tarball.sh
 venv/*
 data/*
