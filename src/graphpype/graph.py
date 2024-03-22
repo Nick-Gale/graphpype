@@ -196,6 +196,43 @@ def constructedDensityPermutationGraph(covariances, density=0.1, nPermutations=1
 
     return distribution
 
+def graphComposite(datum, features):
+    """Takes a datum and a series of features to compose a graph composite. This could include multiple graphs each with multiple features on both edges and nodes. The graph composite is ideal for constructing tensorflowGNN graphs and for specifying regression/classification taasks on multiple graph data."""
+    
+    import tensorflow
+    # features is a dictionary specifying the graph channel, the edge feature channels, and the node feature channels
+    graphData = getattr(d, features["graph"])
+    edges = graphData.edges()
+    nodes = graphData.nodes()
+    
+    nodeFeatures = tensorflow.constant([getattr(d,f) for f in features["nodes"]])
+    assert all([len(nF) == len(nodes) for nF in nodeFeatures]), "The node features must map onto the nodes"
+    
+    edgeFeatures = [getattr(d, f) for f in features["edges"]]
+    assert all([len(eF) == len(edges) for eF in edgeFeatures]) or all([eF.size == [len(nodes), len(nodes)]), "The edge features must either map onto the nodes or be provided as an adjacency matrix."
+    
+    # edge notation
+    for eF in edgeFeatures:
+        if eF.size == [len(nodes), len(nodes)]:
+            eF = [eF[e[0], e[1]], for e in edges]
+
+    nodeSet = {
+        "sizes": tensorflow.constant(len(nodes)),
+        "features": dict(zip(features["nodes"], nodeFeatures))
+            } 
+    
+    # if there is more than adjacency data to be included (e.g. fibre thicfeaturesness between two sites considered to be connected)
+    edgeSet = {
+        "sizes": tensorflow.constant(len(edges))
+        "adjacency": {"source": (features["graph"], tf.constant([e[0] for e in edges])), "target"=(features["graph"], tf.constant([e[1] for e in edges]))},
+        "features" = {dict(zip(features["edges"], edgeFeatures))} 
+            }
+
+    return nodeSet, edgeSet
+
+    
+
+
 def randomCommunityStochasticBlock(g, communities, density=0.1, nGraphs=1000, seed=0):
     """Given a graph G with an already computed community structure use the stochastic block model to create random distribution of graphs with similar community structure. The probabilities are nominally given as a representative edge denisty of the constructed network"""
     sz = [len(i) for i in communities]

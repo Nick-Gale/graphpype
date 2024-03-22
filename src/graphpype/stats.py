@@ -285,4 +285,78 @@ def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[
                     fit[x][y]["model"] = glm
         return fit
 
+def convGraphNeuralNetwork(data, graphComposites=[], layers={}, learningTask={}):
+    """Generalised graph neural networks API call to abstract arbitrary graph data formats and train them following the tfgnn GraphTensor structure.
+
+    Usage:
+
+    data is treated per subject and a dictionary of "graphs" are passed per subject and the node and edge sets in the GraphTensor. Each graph is attached to a keyword e.g. "fmri" or "adjacency" and each of these can hold feature lists for every graph in the data in both the edges and the nodes. Currently, these graphs are considered to be independent i.e. there are assumed to be no edges between each keyword although in principle there is nothing stopping links between, for example, gene regulatory networks and fmri images. The data is specified as a total dataset at either the analysis or dataset level. Graph composites are in the form of a dictionary and specify the channel of the graph, the channels where the node features are derived, and the channels where the edge features are derived.
+
+    `layers` specifies the architecture of the graph neural network i.e. the message parsing format and the number of message passes to make. The final layer must be a dense network to the feature size of the learning context.
+
+    `learningTask` specifies the learning task. It is composed of a dictionary that specifies the training split (by dataset, or by percentage), the optimiser, the epochs, the batch, etc.
+
+    The output is a trained keras model which can be used for inference.
+    """
+    import tensorflow
+    import tensforlow_gnn as tfgnn
+
+    # construct the graph data in tensorflow objects
+    graphDataSets = []
+    for dataSet in data:
+        nodeSets = {}
+        edgeSets = {}
+        context = {}
+        for gf in graphComposites:
+            graphName = graphName
+            nodeSets[graphName]["size"]=[]
+            nodeSets[graphName]["features"]=[]
+            edgeSets[graphName]["size"]=[]
+            edgeSets[graphName]["adjacency"]=[]
+            edgeSets[graphName]["features"]=[]
+        # flatten each dataset into a single graphTensor object
+        for d in dataSet:
+            for gf in graphComposites: # number of components
+                gC = graphComposite(d, gf)
+                graphName = gf["graph"]
+                nodeSets[graphName]["sizes"].append(gC[0]["sizes"])
+                nodeSets[graphName]["features"].append(gC[0]["features"])
+
+                edgeSets[graphName]["sizes"].append(gC[1]["sizes"])
+                edgeSets[graphName]["adjacency"]["source"].append(gC[1]["source"][1])
+                edgeSets[graphName]["adjacency"]["target"].append(gC[1]["target"][1])
+                edgeSets[graphName]["features"].append(gC[1]["features"])
         
+        # make the nodeSets and edgeSets compatible with tfgnn
+        for (graphName, n) in nodeSets:
+            n = tfgnn.NodeSet.from_fields(sizes=n["sizes"], features=n["features"])
+
+        for (graphName, n) in edgeSets:
+            n["adjacency"] = tfgnn.Adjacency.from_indices(source=(graphName, n["adjacency"]["source"]), target=(graphName, n["adjacency"]["target"]_))
+            n = tfgnn.EdgeSet.from_fields(sizes=n["sizes"], adjacency=n["adjacency"], features={}) # TO DO: adapt features
+
+            
+        dTensorFlowGraph = tfgnn.GraphTensor.from_pieces(
+                context=tfgnn.Context.from_fields(features=dGraphContext), # the learning context
+                nodeset=nodeSets, # the features attached to each node of each subgraph that compose the graph composite e.g. fMRI atlas + gene reg network
+                edgeset=edgeSets # the features attached to the edges of each node of each subgraph permitting subgraph - subgraph nodes. This is not typical.
+                )
+        graphDataSets.append(dTensorFlowGraph) # perhaps better to squash datasets together and remeber the indexes for test/train split
+
+    # construct the tensorflow workflow
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
