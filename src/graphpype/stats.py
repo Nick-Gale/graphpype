@@ -285,16 +285,19 @@ def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[
                     fit[x][y]["model"] = glm
         return fit
 
-def convGraphNeuralNetwork(data, graphComposites=[], layers={}, learningTask={}):
+def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
     """Generalised graph neural networks API call to abstract arbitrary graph data formats and train them following the tfgnn GraphTensor structure.
 
     Usage:
 
-    data is treated per subject and a dictionary of "graphs" are passed per subject and the node and edge sets in the GraphTensor. Each graph is attached to a keyword e.g. "fmri" or "adjacency" and each of these can hold feature lists for every graph in the data in both the edges and the nodes. Currently, these graphs are considered to be independent i.e. there are assumed to be no edges between each keyword although in principle there is nothing stopping links between, for example, gene regulatory networks and fmri images. The data is specified as a total dataset at either the analysis or dataset level. Graph composites are in the form of a dictionary and specify the channel of the graph, the channels where the node features are derived, and the channels where the edge features are derived.
+    The data is treated as a dataset and a dictionary of "graphs" are passed per subject and the node and edge sets in the GraphTensor. Each graph is attached to a keyword e.g. "fmri" or "adjacency" and each of these can hold feature lists for every graph in the data in both the edges and the nodes. Currently, these graphs are considered to be independent i.e. there are assumed to be no edges between each keyword although in principle there is nothing stopping links between, for example, gene regulatory networks and fmri images. The data is specified as a total dataset at either the analysis or dataset level. 
 
-    `layers` specifies the architecture of the graph neural network i.e. the message parsing format and the number of message passes to make. The final layer must be a dense network to the feature size of the learning context.
+    Graph composites are in the form of a dictionary and specify the channel of the graph, the channels where the node features are derived, and the channels where the edge features are derived. These are used to derive the subgraphs and features extracted from each datum in the dataset to combine into the final graphTensor representing the entire dataset.
 
-    `learningTask` specifies the learning task. It is composed of a dictionary that specifies the training split (by dataset, or by percentage), the optimiser, the epochs, the batch, etc.
+    `network` specifies the architecture of the graph neural network i.e. the message parsing format and the number of message passes to make. The final layer must be a dense network to the feature size of the learning context.
+
+    `learningTask` specifies the learning task. It is composed of a dictionary that specifies the training split (by dataset, or by percentage), the optimiser, the epochs, the batch, etc. Example: learningTask = {task: {name: "name", parameters: params...}, batchSize=32, nEpochs: 5, validationsPerEpoch: 2, optimizer: "Adam"}
+:w
 
     The output is a trained keras model which can be used for inference.
     """
@@ -304,18 +307,10 @@ def convGraphNeuralNetwork(data, graphComposites=[], layers={}, learningTask={})
     # construct the graph data in tensorflow objects
     graphDataSets = []
     for dataSet in data:
-        nodeSets = {}
-        edgeSets = {}
-        context = {}
-        for gf in graphComposites:
-            graphName = graphName
-            nodeSets[graphName]["size"]=[]
-            nodeSets[graphName]["features"]=[]
-            edgeSets[graphName]["size"]=[]
-            edgeSets[graphName]["adjacency"]=[]
-            edgeSets[graphName]["features"]=[]
-        # flatten each dataset into a single graphTensor object
         for d in dataSet:
+            nodeSets = {}
+            edgeSets = {}
+            context = {}
             for gf in graphComposites: # number of components
                 gC = graphComposite(d, gf)
                 graphName = gf["graph"]
@@ -326,37 +321,105 @@ def convGraphNeuralNetwork(data, graphComposites=[], layers={}, learningTask={})
                 edgeSets[graphName]["adjacency"]["source"].append(gC[1]["source"][1])
                 edgeSets[graphName]["adjacency"]["target"].append(gC[1]["target"][1])
                 edgeSets[graphName]["features"].append(gC[1]["features"])
-        
-        # make the nodeSets and edgeSets compatible with tfgnn
-        for (graphName, n) in nodeSets:
-            n = tfgnn.NodeSet.from_fields(sizes=n["sizes"], features=n["features"])
+            
+            # make the nodeSets and edgeSets compatible with tfgnn
+            for (graphName, n) in nodeSets:
+                n = tfgnn.NodeSet.from_fields(sizes=n["sizes"], features=n["features"])
 
-        for (graphName, n) in edgeSets:
-            n["adjacency"] = tfgnn.Adjacency.from_indices(source=(graphName, n["adjacency"]["source"]), target=(graphName, n["adjacency"]["target"]_))
-            n = tfgnn.EdgeSet.from_fields(sizes=n["sizes"], adjacency=n["adjacency"], features={}) # TO DO: adapt features
+            for (graphName, n) in edgeSets:
+                n["adjacency"] = tfgnn.Adjacency.from_indices(source=(graphName, n["adjacency"]["source"]), target=(graphName, n["adjacency"]["target"]))
+                n = tfgnn.EdgeSet.from_fields(sizes=n["sizes"], adjacency=n["adjacency"], features={}) # TO DO: adapt features
 
             
-        dTensorFlowGraph = tfgnn.GraphTensor.from_pieces(
-                context=tfgnn.Context.from_fields(features=dGraphContext), # the learning context
-                nodeset=nodeSets, # the features attached to each node of each subgraph that compose the graph composite e.g. fMRI atlas + gene reg network
-                edgeset=edgeSets # the features attached to the edges of each node of each subgraph permitting subgraph - subgraph nodes. This is not typical.
+            dTensorFlowGraph = tfgnn.GraphTensor.from_pieces(
+                    context=tfgnn.Context.from_fields(features=dGraphContext), # the learning context
+                    nodeset=nodeSets, # the features attached to each node of each subgraph that compose the graph composite e.g. fMRI atlas + gene reg network
+                    edgeset=edgeSets # the features attached to the edges of each node of each subgraph permitting subgraph - subgraph nodes. This is not typical.
                 )
-        graphDataSets.append(dTensorFlowGraph) # perhaps better to squash datasets together and remeber the indexes for test/train split
-
-    # construct the tensorflow workflow
+            graphDataSets.append(dTensorFlowGraph) # perhaps better to squash datasets together and remeber the indexes for test/train split
     
+    if len(data) == 1:
+        assert 0 < learningTask["trainingSplit"]) < 1, "If a single dataset is selected you must specify the test-training split as a float in (0,1)"
+        trainData = graphDataSets[0:int(round(learningTask["trainingSplit"]))]
+        testData = graphDataSets[int(round(learningTask["trainingSplit"])):]
+    elif len(data) == 2:
+        trainData = graphDataSets[0:len(data[0])]
+        testData = graphDataSets[len(data[0]):]
+    else:
+        raise("The training data must be composed correctly; either as a split dataset indicated by learningTask[:trainingSplit] or as two datasets")
+   
+    # dump the data
+    def create_tfrecords(dataset_splits, dataset_info):
+    """
+    Dump all splits of the given dataset to TFRecord files.
+    """
+    for split_name, dataset in dataset_splits.items():
+        filename = f'data/{dataset_info.name}-{split_name}.tfrecord'
+        print(f'creating {filename}...')
+
+        # convert all datapoints to GraphTensor
+        dataset = dataset.map(make_graph_tensor, num_parallel_calls=tf.data.AUTOTUNE)
+
+        # serialize to TFRecord files
+        with tf.io.TFRecordWriter(filename) as writer:
+            for graph_tensor in tqdm(iter(dataset), total=dataset_info.splits[split_name].num_examples):
+                example = tfgnn.write_example(graph_tensor)
+                writer.write(example.SerializeToString())
 
 
 
+    # create the datasets TFGNN spec
+    trainDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern='DIR/TO/NIFTI/FORMAT/DATA/PROCESS')
+    trainDataSetProvider = train_dataset_provider.get_dataset(context=tf.distribute.InputContext())
+    trainDataSetProvider = trainDataSet.map(lambda serialized: tfgnn.parse_single_example(serialized=serialized, spec=graphSpec))
 
-
-
-
-
-
-
-
-
-
+    testDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern='DIR/TO/NIFTI/FORMAT/DATA/PROCESS')
+    testDataSetProvider = train_dataset_provider.get_dataset(context=tf.distribute.InputContext())
+    testDataSetProvider = testDataSet.map(lambda serialized: tfgnn.parse_single_example(serialized=serialized, spec=graphSpec))
     
+    # construct the neural network
+    def modelFunction(graphSpec)
+        # The meat of the graph neural network model: currently restricted to "existing" architectures. TO DO: add generic implementation features outside of the "define your own function" functionalitly provided by graphpype
+        graph = inputGraph = tf.keras.layers.Input(type_spec=graphSpec)
+        # implement the message passing function from available API calls; error messages fallback on the tfgnn errors
+        modelAPI = getattr(tfgnn.models, network["model"]["name"])
+        updateFunction = getattr(modelAPI, "GraphUpdate")
+        for n in range(learningTask["messagePassingUpdates"]):
+            # conduct several rounds of message parsing and create trainable layers for each of these
+            graph = updateFunction(network["model"]["parameters"])(graph) # the parameters are specified as a dictionary corresponding to the docs for each model api 
+        return tensorflow.keras.Model(inputGraph, graph)
+    
+    # set the initial node states according to a lambda function which extracts over the node name
+    mapFeatures = tfgnn.keras.layers.MapFeatures(node_sets_fn=network["initialNodeStatesFunction"])
 
+    # define the task (i.e. node classification) according to the API implemenations provided by TensorFlow. This has the same problems as neural networks above.
+    taskAPI = getattr(tfgnn.runner, learningTask["task"]["name"])
+    task = taskAPI(learningTask["task"]["parameters"])
+
+    trainer = tfgnn.runner.KerasTrainer(
+            strategy=tf.distribute.TPUStrategy(...),
+            model_dir="...",
+            steps_per_epoch=len(trainData) // learningTask["batchSize"],
+            validation_per_epoch=learningTask["validationsPerEpoch"],
+            steps_per_validation=len(testData) // learningTask["batchSize"]
+            )
+
+    # train
+    res = tfgnn.runner.run(
+                train_ds_provider=trainDataProvider,
+                train_padding=runner.FitOrSkipPadding(graphSpec, trainDataProvider),
+                model_fn=model_fn,
+                optimizer_fn=tf.keras.optimizers.Adam,
+                epochs=learningTask["nEpochs"],
+                trainer=trainer,
+                task=task,
+                gtspec=graphSpec,
+                global_batch_size=learningTask["batchSize"],
+                feature_processors=[mapFeatures],
+                valid_ds_provider=testDataSetProvider
+                )
+
+    return res
+            
+                
+            

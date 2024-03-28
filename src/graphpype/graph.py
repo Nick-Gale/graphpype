@@ -196,6 +196,11 @@ def constructedDensityPermutationGraph(covariances, density=0.1, nPermutations=1
 
     return distribution
 
+def constructCovarianceAverageGraph(covariances, density=0.1, seed=0):
+    """Constructs the average graph over a dataset of covariances using a minimum span density method. This allows for individual registration and covariance determination before global averaging."""
+    avCovariance = numpy.mean(numpy.array(covariances), axis=0)
+    return constructMinSpanDensity(avCovariance, density=density, seed=seed)
+
 def graphComposite(datum, features):
     """Takes a datum and a series of features to compose a graph composite. This could include multiple graphs each with multiple features on both edges and nodes. The graph composite is ideal for constructing tensorflowGNN graphs and for specifying regression/classification taasks on multiple graph data."""
     
