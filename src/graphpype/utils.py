@@ -119,6 +119,7 @@ def loadAnalysisChannel(*totalDataset, dataDirectory="", channel="", dataType="c
         i.analysis[channel] = data
     return None
 
+
 def distanceMat(data):
     L = len(data)
     mat = numpy.zeros((L,L))

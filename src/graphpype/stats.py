@@ -313,7 +313,9 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
             context = {}
             for gf in graphComposites: # number of components
                 gC = graphComposite(d, gf)
+                
                 graphName = gf["graph"]
+                
                 nodeSets[graphName]["sizes"].append(gC[0]["sizes"])
                 nodeSets[graphName]["features"].append(gC[0]["features"])
 
@@ -321,7 +323,9 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
                 edgeSets[graphName]["adjacency"]["source"].append(gC[1]["source"][1])
                 edgeSets[graphName]["adjacency"]["target"].append(gC[1]["target"][1])
                 edgeSets[graphName]["features"].append(gC[1]["features"])
-            
+                
+                # ADD THE CONTEXTT HERE[
+
             # make the nodeSets and edgeSets compatible with tfgnn
             for (graphName, n) in nodeSets:
                 n = tfgnn.NodeSet.from_fields(sizes=n["sizes"], features=n["features"])
@@ -349,31 +353,22 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
         raise("The training data must be composed correctly; either as a split dataset indicated by learningTask[:trainingSplit] or as two datasets")
    
     # dump the data
-    def create_tfrecords(dataset_splits, dataset_info):
-    """
-    Dump all splits of the given dataset to TFRecord files.
-    """
-    for split_name, dataset in dataset_splits.items():
-        filename = f'data/{dataset_info.name}-{split_name}.tfrecord'
-        print(f'creating {filename}...')
-
-        # convert all datapoints to GraphTensor
-        dataset = dataset.map(make_graph_tensor, num_parallel_calls=tf.data.AUTOTUNE)
-
-        # serialize to TFRecord files
+    zipped = zip([trainData, testData], ["train", "test"])
+    for (dataSet, dtype) in zipped:
+        path = learningTask["bidsPath"] + '_' + dtype + '.tfrecord'
         with tf.io.TFRecordWriter(filename) as writer:
-            for graph_tensor in tqdm(iter(dataset), total=dataset_info.splits[split_name].num_examples):
+            for graph_tensor in dataSet: 
                 example = tfgnn.write_example(graph_tensor)
                 writer.write(example.SerializeToString())
 
 
 
     # create the datasets TFGNN spec
-    trainDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern='DIR/TO/NIFTI/FORMAT/DATA/PROCESS')
+    trainDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern=learningTask["bidsPath"] + '_train.tfrecord')
     trainDataSetProvider = train_dataset_provider.get_dataset(context=tf.distribute.InputContext())
     trainDataSetProvider = trainDataSet.map(lambda serialized: tfgnn.parse_single_example(serialized=serialized, spec=graphSpec))
 
-    testDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern='DIR/TO/NIFTI/FORMAT/DATA/PROCESS')
+    testDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern=learningTask["bidsPath"] + '_validate.tfrecord')
     testDataSetProvider = train_dataset_provider.get_dataset(context=tf.distribute.InputContext())
     testDataSetProvider = testDataSet.map(lambda serialized: tfgnn.parse_single_example(serialized=serialized, spec=graphSpec))
     

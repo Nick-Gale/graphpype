@@ -233,8 +233,16 @@ def graphComposite(datum, features):
         "features" = {dict(zip(features["edges"], edgeFeatures))} 
             }
 
-    return nodeSet, edgeSet
+    context = {}
+    if features["context"]:
+        context[features["context"]] = getattr(d, features["context"])
 
+    # rewrite these to easily import into the graph schema
+
+    return nodeSet, edgeSet, context
+
+def graphSchemaFromComposites(graphComposites):
+    """Convert the graph composites into a graph schema that can be read by TensorFlow."""
     
 
 
