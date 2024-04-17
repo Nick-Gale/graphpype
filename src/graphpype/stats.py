@@ -324,6 +324,7 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
                 edgeSets[graphName]["adjacency"]["target"].append(gC[1]["target"][1])
                 edgeSets[graphName]["features"].append(gC[1]["features"])
                 
+                
                 # ADD THE CONTEXTT HERE[
 
             # make the nodeSets and edgeSets compatible with tfgnn

@@ -235,8 +235,10 @@ def graphComposite(datum, features):
 
     context = {}
     if features["context"]:
+        # the training target
         context[features["context"]] = getattr(d, features["context"])
-
+    
+    
     # rewrite these to easily import into the graph schema
 
     return nodeSet, edgeSet, context
