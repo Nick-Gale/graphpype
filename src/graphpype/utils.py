@@ -23,7 +23,7 @@ def fetchAtlas(atlas="msdl", atlasDir="./data/atlases/"):
     # check the atlas exists
     if os.path.exists(atlasDir + atlas):
         atlasObj = loadObj(atlasDir + atlas)
-    else
+    else:
         # fetch the atlas and labels
         funcStr = "datasets.fetch_atlas_" + atlas
         funcFetch = getattr(nilearn, funcStr)

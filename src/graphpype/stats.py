@@ -344,7 +344,7 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
             graphDataSets.append(dTensorFlowGraph) # perhaps better to squash datasets together and remeber the indexes for test/train split
     
     if len(data) == 1:
-        assert 0 < learningTask["trainingSplit"]) < 1, "If a single dataset is selected you must specify the test-training split as a float in (0,1)"
+        assert 0 < learningTask["trainingSplit"] < 1, "If a single dataset is selected you must specify the test-training split as a float in (0,1)"
         trainData = graphDataSets[0:int(round(learningTask["trainingSplit"]))]
         testData = graphDataSets[int(round(learningTask["trainingSplit"])):]
     elif len(data) == 2:
@@ -374,7 +374,7 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
     testDataSetProvider = testDataSet.map(lambda serialized: tfgnn.parse_single_example(serialized=serialized, spec=graphSpec))
     
     # construct the neural network
-    def modelFunction(graphSpec)
+    def modelFunction(graphSpec):
         # The meat of the graph neural network model: currently restricted to "existing" architectures. TO DO: add generic implementation features outside of the "define your own function" functionalitly provided by graphpype
         graph = inputGraph = tf.keras.layers.Input(type_spec=graphSpec)
         # implement the message passing function from available API calls; error messages fallback on the tfgnn errors

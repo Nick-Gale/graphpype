@@ -1,4 +1,4 @@
-import networkx, scipy, numpy, statsmodels, nilean
+import networkx, scipy, numpy, statsmodels
 from graphpype import utils
 
 def anatNifti(data, atlas="msdl", atlasDir="./data/atlases", standardize="zscore_sample", standardize_confounds="zscore_sample", memory="nilearn_cache", verbose="0", confounds=False):
@@ -214,12 +214,12 @@ def graphComposite(datum, features):
     assert all([len(nF) == len(nodes) for nF in nodeFeatures]), "The node features must map onto the nodes"
     
     edgeFeatures = [getattr(d, f) for f in features["edges"]]
-    assert all([len(eF) == len(edges) for eF in edgeFeatures]) or all([eF.size == [len(nodes), len(nodes)]), "The edge features must either map onto the nodes or be provided as an adjacency matrix."
-    
+    assert all([len(eF) == len(edges) for eF in edgeFeatures]) or all(eF.size == [len(nodes), len(nodes)]), "The edge features must either map onto the nodes or be provided as an adjacency matrix."
+   
     # edge notation
     for eF in edgeFeatures:
         if eF.size == [len(nodes), len(nodes)]:
-            eF = [eF[e[0], e[1]], for e in edges]
+            eF = [(eF[e[0], e[1]]) for e in edges]
 
     nodeSet = {
         "sizes": tensorflow.constant(len(nodes)),
@@ -228,9 +228,9 @@ def graphComposite(datum, features):
     
     # if there is more than adjacency data to be included (e.g. fibre thicfeaturesness between two sites considered to be connected)
     edgeSet = {
-        "sizes": tensorflow.constant(len(edges))
-        "adjacency": {"source": (features["graph"], tf.constant([e[0] for e in edges])), "target"=(features["graph"], tf.constant([e[1] for e in edges]))},
-        "features" = {dict(zip(features["edges"], edgeFeatures))} 
+        "sizes": tensorflow.constant(len(edges)),
+        "adjacency": {"source": (features["graph"], tf.constant([e[0] for e in edges])), "target": (features["graph"], tf.constant([e[1] for e in edges]))},
+        "features": {dict(zip(features["edges"], edgeFeatures))} 
             }
 
     context = {}

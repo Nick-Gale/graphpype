@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>graphpype package &mdash; GraphPype 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="graphpype" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GraphPype
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">graphpype</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">graphpype package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-graphpype.graph">graphpype.graph module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.anatNifti"><code class="docutils literal notranslate"><span class="pre">anatNifti()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.constructCovarianceAverageGraph"><code class="docutils literal notranslate"><span class="pre">constructCovarianceAverageGraph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.constructMinSpanDensity"><code class="docutils literal notranslate"><span class="pre">constructMinSpanDensity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.constructedDensityPermutationGraph"><code class="docutils literal notranslate"><span class="pre">constructedDensityPermutationGraph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.covNifti"><code class="docutils literal notranslate"><span class="pre">covNifti()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.degreeCDF"><code class="docutils literal notranslate"><span class="pre">degreeCDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.degreeHistogram"><code class="docutils literal notranslate"><span class="pre">degreeHistogram()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.euclideanDistanceMatrix"><code class="docutils literal notranslate"><span class="pre">euclideanDistanceMatrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.featureDegreeDistribution"><code class="docutils literal notranslate"><span class="pre">featureDegreeDistribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.graphComposite"><code class="docutils literal notranslate"><span class="pre">graphComposite()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.graphSchemaFromComposites"><code class="docutils literal notranslate"><span class="pre">graphSchemaFromComposites()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.greedyModules"><code class="docutils literal notranslate"><span class="pre">greedyModules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.louvainCommunities"><code class="docutils literal notranslate"><span class="pre">louvainCommunities()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.randomCommunityStochasticBlock"><code class="docutils literal notranslate"><span class="pre">randomCommunityStochasticBlock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.randomSpin"><code class="docutils literal notranslate"><span class="pre">randomSpin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.graph.wiringCost"><code class="docutils literal notranslate"><span class="pre">wiringCost()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-graphpype.pipe">graphpype.pipe module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.pipe.DataSet"><code class="docutils literal notranslate"><span class="pre">DataSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.pipe.Datum"><code class="docutils literal notranslate"><span class="pre">Datum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.pipe.Operator"><code class="docutils literal notranslate"><span class="pre">Operator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.pipe.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.pipe.Recipe"><code class="docutils literal notranslate"><span class="pre">Recipe</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-graphpype.stats">graphpype.stats module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.compareDist"><code class="docutils literal notranslate"><span class="pre">compareDist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.compareGroupDegreeMeans"><code class="docutils literal notranslate"><span class="pre">compareGroupDegreeMeans()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.covarianceMatrix"><code class="docutils literal notranslate"><span class="pre">covarianceMatrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.estimateDistancePermutation"><code class="docutils literal notranslate"><span class="pre">estimateDistancePermutation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.generalLinearModel"><code class="docutils literal notranslate"><span class="pre">generalLinearModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.generatePermutations"><code class="docutils literal notranslate"><span class="pre">generatePermutations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.graphNeuralNetwork"><code class="docutils literal notranslate"><span class="pre">graphNeuralNetwork()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.loadFeature"><code class="docutils literal notranslate"><span class="pre">loadFeature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.modularOverlap"><code class="docutils literal notranslate"><span class="pre">modularOverlap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.modularZTest"><code class="docutils literal notranslate"><span class="pre">modularZTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.multipleTTest"><code class="docutils literal notranslate"><span class="pre">multipleTTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.stats.pairgroupModularZTest"><code class="docutils literal notranslate"><span class="pre">pairgroupModularZTest()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-graphpype.utils">graphpype.utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.distanceMat"><code class="docutils literal notranslate"><span class="pre">distanceMat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.fetchAtlas"><code class="docutils literal notranslate"><span class="pre">fetchAtlas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.fmriprep"><code class="docutils literal notranslate"><span class="pre">fmriprep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.generateTemplate"><code class="docutils literal notranslate"><span class="pre">generateTemplate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.loadAnalysisChannel"><code class="docutils literal notranslate"><span class="pre">loadAnalysisChannel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.loadObject"><code class="docutils literal notranslate"><span class="pre">loadObject()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.loadParcellation"><code class="docutils literal notranslate"><span class="pre">loadParcellation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.plots"><code class="docutils literal notranslate"><span class="pre">plots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.saveObject"><code class="docutils literal notranslate"><span class="pre">saveObject()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graphpype.utils.vectorSlice"><code class="docutils literal notranslate"><span class="pre">vectorSlice()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-graphpype">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GraphPype</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">graphpype</a></li>
+      <li class="breadcrumb-item active">graphpype package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/graphpype.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="graphpype-package">
+<h1>graphpype package<a class="headerlink" href="#graphpype-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-graphpype.graph">
+<span id="graphpype-graph-module"></span><h2>graphpype.graph module<a class="headerlink" href="#module-graphpype.graph" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.anatNifti">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">anatNifti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atlas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'msdl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atlasDir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data/atlases'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zscore_sample'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_confounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zscore_sample'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nilearn_cache'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.anatNifti" title="Link to this definition"></a></dt>
+<dd><p>A simple API wrapper for the nilearn function for constructing a covariance matrix according to an atlas from Nifti data formats.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.constructCovarianceAverageGraph">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">constructCovarianceAverageGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covariances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.constructCovarianceAverageGraph" title="Link to this definition"></a></dt>
+<dd><p>Constructs the average graph over a dataset of covariances using a minimum span density method. This allows for individual registration and covariance determination before global averaging.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.constructMinSpanDensity">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">constructMinSpanDensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covariance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.constructMinSpanDensity" title="Link to this definition"></a></dt>
+<dd><p>A covariance matrix (M) is used as a fully connected graph from which a minimal spanning tree (S) is constructed. The number of edges (N) in this spanning tree is calculated and the covariances asscociated with the nodes in the tree are set to zero. Finally, the difference (D) between the required density of edges (Nr) and the number of edges is calculated and D samples without replacement are taken using the remaining covariances as weights. These samples are added as edges into S to construct the final graph G.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.constructedDensityPermutationGraph">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">constructedDensityPermutationGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covariances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPermutations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.constructedDensityPermutationGraph" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.covNifti">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">covNifti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atlas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'msdl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atlasDir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data/atlases'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zscore_sample'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_confounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zscore_sample'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nilearn_cache'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.covNifti" title="Link to this definition"></a></dt>
+<dd><p>A simple API wrapper for the nilearn function for constructing a covariance matrix according to an atlas from Nifti data formats.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.degreeCDF">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">degreeCDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.degreeCDF" title="Link to this definition"></a></dt>
+<dd><p>Calculate the degree distribution as an empirical CDF. Returns a list of degree size and cummlative logged or unlogged CDF values (default: logProb = true). Finally, a model of the ecdf is returned from <cite>statsmodels</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.degreeHistogram">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">degreeHistogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.degreeHistogram" title="Link to this definition"></a></dt>
+<dd><p>Calculate the degree histogram according to a particular number of bins (default: 1).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.euclideanDistanceMatrix">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">euclideanDistanceMatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.euclideanDistanceMatrix" title="Link to this definition"></a></dt>
+<dd><p>Returns a distance matrix between parcellations. Expects the coordinates to be a vector for each parcellation and returns the Euclidean distances for each of them.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.featureDegreeDistribution">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">featureDegreeDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.featureDegreeDistribution" title="Link to this definition"></a></dt>
+<dd><p>Concatenates features with the same degree and returns the mean and deviation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.graphComposite">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">graphComposite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.graphComposite" title="Link to this definition"></a></dt>
+<dd><p>Takes a datum and a series of features to compose a graph composite. This could include multiple graphs each with multiple features on both edges and nodes. The graph composite is ideal for constructing tensorflowGNN graphs and for specifying regression/classification taasks on multiple graph data.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.graphSchemaFromComposites">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">graphSchemaFromComposites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graphComposites</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.graphSchemaFromComposites" title="Link to this definition"></a></dt>
+<dd><p>Convert the graph composites into a graph schema that can be read by TensorFlow.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.greedyModules">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">greedyModules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.greedyModules" title="Link to this definition"></a></dt>
+<dd><p>A simple wrapper for a greedy community detection algorithm using modularity maximisation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.louvainCommunities">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">louvainCommunities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cuda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.louvainCommunities" title="Link to this definition"></a></dt>
+<dd><p>A simple wrapper for the default parameters of the NetworkX implementation of the Louvain Clustering algorithm. The graph is weighted by the adjacency matrix and the seed must by specified according to the recipe.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.randomCommunityStochasticBlock">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">randomCommunityStochasticBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">communities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nGraphs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.randomCommunityStochasticBlock" title="Link to this definition"></a></dt>
+<dd><p>Given a graph G with an already computed community structure use the stochastic block model to create random distribution of graphs with similar community structure. The probabilities are nominally given as a representative edge denisty of the constructed network</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.randomSpin">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">randomSpin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atlas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'msdl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atlasDir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data/atlases/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPermutations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.randomSpin" title="Link to this definition"></a></dt>
+<dd><p>A native implementation of the method proposed by Alexander-Block et. al. (2018) to control for spatial autocorrelation. Given data that is spatially distributed with a notion of spherical symmetry and an atlas of distance coordinates a spherical rotation is applied to the 3D space of the data and the atlas region associated with each datum is remapped to the closest (as the crow flies) atlas region. The data is typically in the form of feature (or biomarker) and can be a 3D or 4D tensor corrospending to some (registered) measurement. Currently, an atlas must be provided and it is rotated to give a new rotated atlas.</p>
+<p>Usage notes: Spinning a set of coordinates and aligning them to an atlas is equivalent to reverse-spinning the atlas. The latter is more space efficient does not compound errors (outside of those in the original atlas mapping). A diveregence from the original implementation is the generation of random numbers; the original paper stated rotations on the sphere were uniformly distributed but the Git repository indicated sampling from a normal distribution and enforcing orthoganality via QR decomposition. This is a costly procedure. Here we will sample each angle from the distribution U([0,1]) and transform to the correct range for appropriate Euler angles.</p>
+<p>To do: offer acceleration through CUDA</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.graph.wiringCost">
+<span class="sig-prename descclassname"><span class="pre">graphpype.graph.</span></span><span class="sig-name descname"><span class="pre">wiringCost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.graph.wiringCost" title="Link to this definition"></a></dt>
+<dd><p>Computes the standard wiring cost of a network defined by an adjancency matric and with a defined distance metric between the nodes. The cost (W) is the sum of the distances (D) weighted by the connectivity topology (A) normalised by the node number (N):
+W =1/N Σ AijDij</p>
+</dd></dl>
+
+</section>
+<section id="module-graphpype.pipe">
+<span id="graphpype-pipe-module"></span><h2>graphpype.pipe module<a class="headerlink" href="#module-graphpype.pipe" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="graphpype.pipe.DataSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphpype.pipe.</span></span><span class="sig-name descname"><span class="pre">DataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataObjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.DataSet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A composition of data with type <cite>Datum</cite>. Contains dataset level analysis and processing.</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(directory, channel, loader)</p></td>
+<td><p>Call self as a function.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.DataSet.analysis">
+<span class="sig-name descname"><span class="pre">analysis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#graphpype.pipe.DataSet.analysis" title="Link to this definition"></a></dt>
+<dd><p>Group level analysis of processed data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.DataSet.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#graphpype.pipe.DataSet.data" title="Link to this definition"></a></dt>
+<dd><p>The processed data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.DataSet.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.DataSet.name" title="Link to this definition"></a></dt>
+<dd><p>A name for the dataset (default: “”)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphpype.pipe.Datum">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphpype.pipe.</span></span><span class="sig-name descname"><span class="pre">Datum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">directories</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Datum" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An object that completely specifies a particular element of the dataset with potentially multiple imaging modalities.</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(directory)</p></td>
+<td><p>Call self as a function.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>addChannel</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphpype.pipe.Datum.addChannel">
+<span class="sig-name descname"><span class="pre">addChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Datum.addChannel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Datum.dirs">
+<span class="sig-name descname"><span class="pre">dirs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#graphpype.pipe.Datum.dirs" title="Link to this definition"></a></dt>
+<dd><p>List of the directories used for the specimen/subject in the analysis.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Datum.postData">
+<span class="sig-name descname"><span class="pre">postData</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#graphpype.pipe.Datum.postData" title="Link to this definition"></a></dt>
+<dd><p>Dictionary storing the processed data from a particular operator e.g. Dict[“Connectivity”] = matrix</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Datum.preData">
+<span class="sig-name descname"><span class="pre">preData</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#graphpype.pipe.Datum.preData" title="Link to this definition"></a></dt>
+<dd><p>Dictionary storing the preprocessed data from a particular pipeline such as prepfmri e.g. Dict[“Connectivity”] = matrix</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphpype.pipe.</span></span><span class="sig-name descname"><span class="pre">Operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name=&lt;class</span> <span class="pre">'str'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description=&lt;class</span> <span class="pre">'str'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function=&lt;class</span> <span class="pre">'dict'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels=&lt;class</span> <span class="pre">'dict'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args=&lt;class</span> <span class="pre">'dict'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inter={}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Operator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A processing operator that operates on a discrete chunk of data which either is broadcastover/reduces a data set. The result is stored in the DataType object in a channel indexed as a dictionary and specified by this operator.</p>
+<dl>
+<dt>Usage: Operator(function, channels, arguments, inter)</dt><dd><p>To specify the function:
+function = {“name”: name of the function,</p>
+<blockquote>
+<div><p>“package”: e.g numpy.random,
+“version”: blank if installed package / directory of user defined function}</p>
+</div></blockquote>
+<dl class="simple">
+<dt>channels ={{“dataIndex”: {“Layer”: [“Channel1”, “Channel2”, etc]}, {“Layer2”: [“Channel0”]}}, </dt><dd><p>{“resultIndex”: {“Layer”: [“SingleChannel”]}}}</p>
+</dd>
+</dl>
+<p>arguments = {“unnamed” = [], “alpha”: 0, “beta”: 1}</p>
+<p>inter = {}, {“broadcast”: True}
+The default is to apply the operator to the function channel as is but occasionally you might want to broadcast over a list of elements in the channel e.g. doing a spin correction.</p>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(data[, ret])</p></td>
+<td><p>The operator can be used to operate on a datum by specifying the data layers and channels.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#graphpype.pipe.Operator.arguments" title="Link to this definition"></a></dt>
+<dd><p>The arguments required to run the operator. Unnamed arguments should be assigned to the dictionary entry unnamed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.basePackage">
+<span class="sig-name descname"><span class="pre">basePackage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Operator.basePackage" title="Link to this definition"></a></dt>
+<dd><p>Give the package name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.channelOut">
+<span class="sig-name descname"><span class="pre">channelOut</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#graphpype.pipe.Operator.channelOut" title="Link to this definition"></a></dt>
+<dd><p>The shape of the container of the returned data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.channelsIn">
+<span class="sig-name descname"><span class="pre">channelsIn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#graphpype.pipe.Operator.channelsIn" title="Link to this definition"></a></dt>
+<dd><p>The shape of the container of the incoming data. The first entry specifies the layer on which the operator should function</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Operator.description" title="Link to this definition"></a></dt>
+<dd><p>A description of what the operator does.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.internal">
+<span class="sig-name descname"><span class="pre">internal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#graphpype.pipe.Operator.internal" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of internal operating requirements e.g. broadcast, reduce. Broadcast and reduce will always be applied to the first index of the data channels</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.json">
+<span class="sig-name descname"><span class="pre">json</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#graphpype.pipe.Operator.json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Operator.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.opName">
+<span class="sig-name descname"><span class="pre">opName</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Operator.opName" title="Link to this definition"></a></dt>
+<dd><p>A local understandable name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.packageDir">
+<span class="sig-name descname"><span class="pre">packageDir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Operator.packageDir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Operator.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Operator.version" title="Link to this definition"></a></dt>
+<dd><p>Give the version number for the locally installed package. If the function is self defined then provide the relative directory.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphpype.pipe.Pipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphpype.pipe.</span></span><span class="sig-name descname"><span class="pre">Pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipeDir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Pipeline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Piping object.</p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>output</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>plot</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>process</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="graphpype.pipe.Pipeline.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Pipeline.output" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Pipeline.paths">
+<span class="sig-name descname"><span class="pre">paths</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#graphpype.pipe.Pipeline.paths" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphpype.pipe.Pipeline.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputDir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Pipeline.plot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphpype.pipe.Pipeline.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataSetNames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preProcess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Pipeline.process" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Pipeline.recipe">
+<span class="sig-name descname"><span class="pre">recipe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">any</span></em><a class="headerlink" href="#graphpype.pipe.Pipeline.recipe" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Pipeline.result">
+<span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">any</span></em><a class="headerlink" href="#graphpype.pipe.Pipeline.result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">graphpype.pipe.</span></span><span class="sig-name descname"><span class="pre">Recipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'nThreads':</span> <span class="pre">1,</span> <span class="pre">'seed':</span> <span class="pre">1}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Recipe" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pipeline Recipe: a directed line graph of functions/constants that operate on a subset of data for analysis, output, and plotting. The recipe informs the operations that must be sequentially applied to data and subsequent output manipulations. Recipes can be composed by concatentation.</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#graphpype.pipe.Recipe.read" title="graphpype.pipe.Recipe.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>(inputDir)</p></td>
+<td><p>Read a recipe in .json format from disk and construct recipe object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#graphpype.pipe.Recipe.report" title="graphpype.pipe.Recipe.report"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report</span></code></a>(data)</p></td>
+<td><p>Generate a report card summarising the recipe</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#graphpype.pipe.Recipe.write" title="graphpype.pipe.Recipe.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(outputDir)</p></td>
+<td><p>Write the recipe to disk in .json format for use in pipelines</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Recipe.description" title="Link to this definition"></a></dt>
+<dd><p>Summary of the pipeline flow i.e. brief description of what the recipe cooks.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe.env">
+<span class="sig-name descname"><span class="pre">env</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#graphpype.pipe.Recipe.env" title="Link to this definition"></a></dt>
+<dd><p>Any enviroment variables including number of threads, randomisation seed, etc.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#graphpype.pipe.Recipe.name" title="Link to this definition"></a></dt>
+<dd><p>Recipe identifier</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe.nodes">
+<span class="sig-name descname"><span class="pre">nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#graphpype.pipe.Recipe.nodes" title="Link to this definition"></a></dt>
+<dd><p>Functions that the analysis will operate with. The entries are: “preProcess”, “postProcess”, “analysis”, “postAnalysis”, and “output”. Analysis refers to functions that are applied to a specific data set, while postAnalysis refers to functions that are applied to multiple datasets. Plotting, or output functions such as reports and caching go in the “output” layer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputDir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Recipe.read" title="Link to this definition"></a></dt>
+<dd><p>Read a recipe in .json format from disk and construct recipe object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe.report">
+<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Recipe.report" title="Link to this definition"></a></dt>
+<dd><p>Generate a report card summarising the recipe</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="graphpype.pipe.Recipe.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputDir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.pipe.Recipe.write" title="Link to this definition"></a></dt>
+<dd><p>Write the recipe to disk in .json format for use in pipelines</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-graphpype.stats">
+<span id="graphpype-stats-module"></span><h2>graphpype.stats module<a class="headerlink" href="#module-graphpype.stats" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.compareDist">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">compareDist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Kolmogorov-Smirnov'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.compareDist" title="Link to this definition"></a></dt>
+<dd><p>Assesses the degree to which two empirical distributions are statistically different. There are some common ways of doing this: assuming the degree distribution takes a specific functional form, or the general Kolmogorov-Smirnov test. Support is provided for degree distributions assumed to be in the power-law form or the Kolmogorov-Smirnov through the <cite>test</cite> keyword  (default <cite>test=’Kolmogorov-Smirnov’</cite>)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.compareGroupDegreeMeans">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">compareGroupDegreeMeans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FDR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.compareGroupDegreeMeans" title="Link to this definition"></a></dt>
+<dd><p>Returns the pairwise t-test between a list of data for each degree in a groupwise graph. These tests are corrected and significant degrees are reported.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.covarianceMatrix">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">covarianceMatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.covarianceMatrix" title="Link to this definition"></a></dt>
+<dd><p>Returns the covariance matrix (size: L x L) of a data distributed amongst a particular parcellation (size: L) for a particular dataset (size: N). The default behavior is to normalise by standard deviations returning the regular Pearsons correlation coefficient.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.estimateDistancePermutation">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">estimateDistancePermutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distanceDist</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.estimateDistancePermutation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.generalLinearModel">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">generalLinearModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariateChannels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressorChannels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.generalLinearModel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.generatePermutations">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">generatePermutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'degree'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.generatePermutations" title="Link to this definition"></a></dt>
+<dd><p>Generate a random set of permutations for a given adjacency matrix that serve as a null-model distribution under some assumption i.e. preserving degree distribution. Currently supported options are: ‘degree’, ‘spin’, ‘random’. Degree distributions are generated using the FILLTHISIN method from FILLTHISINPACKAGE/PAPER. Spin models follow the structure presented by Block et. al. and implemented in FILLTHISINPACKAGE. Random assumes no structure and provides random permutations of the matrix.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.graphNeuralNetwork">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">graphNeuralNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphComposites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learningTask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.graphNeuralNetwork" title="Link to this definition"></a></dt>
+<dd><p>Generalised graph neural networks API call to abstract arbitrary graph data formats and train them following the tfgnn GraphTensor structure.</p>
+<blockquote>
+<div><p>Usage:</p>
+<p>The data is treated as a dataset and a dictionary of “graphs” are passed per subject and the node and edge sets in the GraphTensor. Each graph is attached to a keyword e.g. “fmri” or “adjacency” and each of these can hold feature lists for every graph in the data in both the edges and the nodes. Currently, these graphs are considered to be independent i.e. there are assumed to be no edges between each keyword although in principle there is nothing stopping links between, for example, gene regulatory networks and fmri images. The data is specified as a total dataset at either the analysis or dataset level.</p>
+<p>Graph composites are in the form of a dictionary and specify the channel of the graph, the channels where the node features are derived, and the channels where the edge features are derived. These are used to derive the subgraphs and features extracted from each datum in the dataset to combine into the final graphTensor representing the entire dataset.</p>
+<p><cite>network</cite> specifies the architecture of the graph neural network i.e. the message parsing format and the number of message passes to make. The final layer must be a dense network to the feature size of the learning context.</p>
+<p><cite>learningTask</cite> specifies the learning task. It is composed of a dictionary that specifies the training split (by dataset, or by percentage), the optimiser, the epochs, the batch, etc. Example: learningTask = {task: {name: “name”, parameters: params…}, batchSize=32, nEpochs: 5, validationsPerEpoch: 2, optimizer: “Adam”}</p>
+</div></blockquote>
+<p>:w</p>
+<blockquote>
+<div><p>The output is a trained keras model which can be used for inference.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.loadFeature">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">loadFeature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.loadFeature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.modularOverlap">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">modularOverlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modules1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modules2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.modularOverlap" title="Link to this definition"></a></dt>
+<dd><p>Given a vector of module membership of nodes compute the modular overlap and return a z-transformed score. To compute the modular overlap compute the fraction of pairs of nodes that share a module in both groups i.e. a binary vector. Note: this is not a symetric relationship between partitions as the vectors will have different lengths based on which is chosen first. Return the mean/std of the vector.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.modularZTest">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">modularZTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">modules</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.modularZTest" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.multipleTTest">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">multipleTTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FDR'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.multipleTTest" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.stats.pairgroupModularZTest">
+<span class="sig-prename descclassname"><span class="pre">graphpype.stats.</span></span><span class="sig-name descname"><span class="pre">pairgroupModularZTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">modules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FDR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.stats.pairgroupModularZTest" title="Link to this definition"></a></dt>
+<dd><p>Compute the modular overlap of each of the measured populations and each paired sample from the null model. The z-test then computes Z values for each paired difference of the modular overlap of each pair of groupings when compared against the paired difference of distributions in each pair of groupings. These p-values are corrected (default: FDR) and returned as a matrix of pairs of the paired groupings and the signficance values are reported.</p>
+</dd></dl>
+
+</section>
+<section id="module-graphpype.utils">
+<span id="graphpype-utils-module"></span><h2>graphpype.utils module<a class="headerlink" href="#module-graphpype.utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.distanceMat">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">distanceMat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.distanceMat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.fetchAtlas">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">fetchAtlas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atlas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'msdl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atlasDir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data/atlases/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.fetchAtlas" title="Link to this definition"></a></dt>
+<dd><p>Grabs an atlas using the NiLearn API. The default atlas used is the msdl atlas but this can be specified to work with any atlas available in the NiLearn database.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.fmriprep">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">fmriprep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmriprep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stringAdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.fmriprep" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.generateTemplate">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">generateTemplate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exampleFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic.py'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.generateTemplate" title="Link to this definition"></a></dt>
+<dd><p>Generates a fill-in-the-blanks template to work with. This is generally easier than remembering all the particular details about how operators (and in particular some common Operators) should be specified. Writes the recipe immediately to the name specified and the recipe exists in the python session and can be dynamically edited.</p>
+<p>Usage notes: if dynamically editing in Python remember to call pipe.write(“someRecipeName.json”)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.loadAnalysisChannel">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">loadAnalysisChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">totalDataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataDirectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'csv'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.loadAnalysisChannel" title="Link to this definition"></a></dt>
+<dd><p>Loads data into a specified channel for all analysis groups. Very hacky.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.loadObject">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">loadObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.loadObject" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.loadParcellation">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">loadParcellation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">totalDataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataDirectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listFilterDirectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nameFilter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.loadParcellation" title="Link to this definition"></a></dt>
+<dd><p>Loading a combined dataset which has a specific parcellation and is filtered into subdatasets according to a filter list. If listFilter is empty then all parcellations are loaded into the data field of the combined dataset; else load each parcellation into the data field of the indexed data entry in the combined dataset indexed by name if provided else by order. Expects a matrix of floats, a (possibly empty) list of strings, and a dataset.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.plots">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotsDir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.plots" title="Link to this definition"></a></dt>
+<dd><p>Takes a plotting script and converts it into an operator.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.saveObject">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">saveObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.saveObject" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="graphpype.utils.vectorSlice">
+<span class="sig-prename descclassname"><span class="pre">graphpype.utils.</span></span><span class="sig-name descname"><span class="pre">vectorSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#graphpype.utils.vectorSlice" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-graphpype">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-graphpype" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="graphpype" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Nicholas M. Gale.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
