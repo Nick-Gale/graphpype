@@ -1,11 +1,5 @@
-graphpype package
+GraphPype
 =================
-
-Submodules
-----------
-
-graphpype.graph module
-----------------------
 
 .. automodule:: graphpype.graph
    :members:

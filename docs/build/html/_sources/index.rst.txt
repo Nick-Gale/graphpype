@@ -7,11 +7,12 @@ Welcome to GraphPype's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
    modules
-
+   gettingstarted 
+   contributing
 Indices and tables
 ==================
 

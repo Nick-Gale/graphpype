@@ -1,4 +1,18 @@
 # Submodule: pipelines. Functions dedicated to constructing pipelines: pre-processing, processing, plotting, and end-to-end functionality.
+"""
+Pipelines
+=========
+A collection of functions and object classes to construct recipes and run analysis pipelines.
+
+The major conceptual classes exported are:
+    1. Datum - graphpypes internal expression of data containing metadata fields, preprocessing, and post-processing analysis of raw data.
+    2. Dataset - graphpypes internal represtation of datasets comprising of a list of data objects and analysis. Is composable with itself.
+    3. Operator - graphpypes internal representation of functions that operator on data and datasets. Contains metadata to aid with reproducibility and portability.
+    4. Recipe - an object to specify how operators should interact with data.
+    5. Pipeline - an object to construct and analyse data through a structured pipeline defined by the recipe.
+"""
+
+
 import importlib, warnings, os, time
 import subprocess 
 # Constants
@@ -6,12 +20,26 @@ import subprocess
 # Classes
 
 class Pipeline:
-    """Piping object."""
+    r"""
+
+    Pipeline object: takes a recipe and executes it over a series of datapaths.
+    
+    Attributes
+    ----------
+    recipe : graphpype.pipe.recipe
+        The recipe for the pipeline to execute.
+    paths : list
+        The BIDS paths for data.
+    result : graphpype.pipe.dataset
+        A dataset containing the post-analysis, individual dataset analyses, post-processing of each datum, and preprocessing routines.
+
+
+    """
     recipe: any
     paths: list
     result: any
     def __init__(self, recipeDir, bids = {}):
-
+        r"""Initialise a pipeline object."""
         recipe = Recipe()
         recipe.read(recipeDir)
         self.recipe = recipe
@@ -25,6 +53,15 @@ class Pipeline:
         self.paths = subjPaths
 
     def process(pipe, dataSetNames=[], preProcess=True):
+        r"""Process a pipeline over a series of datasets.
+
+        Parameters
+        ----------
+        dataSetNames : list
+            A list of strings defining the datasets to process.
+        preProcess : bool, optional
+            Optional, but recommended, preprocessing.
+        """
         processingStart = time.time()
         datasets = []
         if preProcess:
@@ -94,6 +131,7 @@ class Pipeline:
         print(f"Total processing time: {processingFinish - processingStart} seconds")
 
     def output(outputDir):
+        """Generate the output of the analysis."""
         # output is classed differently to processing because it is likely to change often and the whole processing pipe needn't be run multiple times
         assert outputDir[0] != '/', "Please use relative directories, not absolute."
         
@@ -110,7 +148,7 @@ class Pipeline:
             os.chdir(os.getcwd() + '../')
 
     def plot(self, outputDir):
-        
+        """Generate plot files for the plotting objects defined in the analysis.""" 
         import matplotlib.pyplot as plt
         
         plotObjs = self.result.analysis["plots"][0]
@@ -121,20 +159,27 @@ class Pipeline:
 
 
 class Recipe:
-    """Pipeline Recipe: a directed line graph of functions/constants that operate on a subset of data for analysis, output, and plotting. The recipe informs the operations that must be sequentially applied to data and subsequent output manipulations. Recipes can be composed by concatentation."""
+    r"""
+    Pipeline Recipe: a directed line graph of functions/constants that operate on a subset of data for analysis, output, and plotting. 
 
+    The recipe informs the operations that must be sequentially applied to data and subsequent output manipulations. Recipes can be composed by concatentation.
+
+    Attributes
+    ----------
     name: str
-    """Recipe identifier"""
-
+        Recipe identifier
     description: str
-    """Summary of the pipeline flow i.e. brief description of what the recipe cooks."""
-
+        Summary of the pipeline flow i.e. brief description of what the recipe cooks.
     nodes: dict 
-    """Functions that the analysis will operate with. The entries are: "preProcess", "postProcess", "analysis", "postAnalysis", and "output". Analysis refers to functions that are applied to a specific data set, while postAnalysis refers to functions that are applied to multiple datasets. Plotting, or output functions such as reports and caching go in the "output" layer."""
-
+        Functions that the analysis will operate with. The entries are: "preProcess", "postProcess", "analysis", "postAnalysis", and "output". Analysis refers to functions that are applied to a specific data set, while postAnalysis refers to functions that are applied to multiple datasets. Plotting, or output functions such as reports and caching go in the "output" layer.
     env: dict
-    """Any enviroment variables including number of threads, randomisation seed, etc."""
+        Any enviroment variables including number of threads, randomisation seed, etc.
 
+    """
+    name: str
+    description: str
+    nodes: dict 
+    env: dict
     def __init__(self, name: str="", description: str="", nodes: dict={}, env: dict={"seed": 1, "nThreads": 1}):
         """Initialise a (potentially empty) recipe card with a name and descriptor."""
         self.name = name
@@ -147,7 +192,18 @@ class Recipe:
 
             ### DO THIS ###
     def write(self, outputDir):
-        """Write the recipe to disk in .json format for use in pipelines"""
+        """
+        Write the recipe to disk in .json format for use in pipelines.
+        
+        Parameters
+        ----------
+        outputDir : str
+            The path to write the recipe to.
+
+        Returns
+        -------
+        None
+        """
         import json
         with open(outputDir, 'w') as f:
             # print())
@@ -160,7 +216,14 @@ class Recipe:
             json.dump(json_obj, f, ensure_ascii=False, indent=4)
     
     def read(self, inputDir):
-        """Read a recipe in .json format from disk and construct recipe object."""
+        r"""
+        Read a recipe in .json format from disk and construct recipe object.
+
+        Parameters
+        ----------
+        inputDir : str
+            The path to a recipe.
+        """
         import json
         with open(inputDir, 'r') as f:
             recipe = json.load(f) 
@@ -177,14 +240,24 @@ class Recipe:
         self.env = recipe["env"]
 
 class Datum:
-    """An object that completely specifies a particular element of the dataset with potentially multiple imaging modalities."""
+    r"""
+    An object that completely specifies a particular element of the dataset with potentially multiple imaging modalities.
+
+    Attributes
+    ----------
 
     dirs: list
-    """List of the directories used for the specimen/subject in the analysis."""
+    List of the directories used for the specimen/subject in the analysis.
     preData: dict
-    """Dictionary storing the preprocessed data from a particular pipeline such as prepfmri e.g. Dict["Connectivity"] = matrix"""
+    Dictionary storing the preprocessed data from a particular pipeline such as prepfmri e.g. Dict["Connectivity"] = matrix
     postData: dict
-    """Dictionary storing the processed data from a particular operator e.g. Dict["Connectivity"] = matrix"""
+    Dictionary storing the processed data from a particular operator e.g. Dict["Connectivity"] = matrix
+
+    """ 
+
+    dirs: list
+    preData: dict
+    postData: dict
     
     def __init__(self, *directories):
         self.dirs = []
@@ -230,13 +303,22 @@ class Datum:
         self.preData[channel] = data
         
 class DataSet:
-    """A composition of data with type `Datum`. Contains dataset level analysis and processing."""
+    r"""
+    A composition of data with type `Datum`. Contains dataset level analysis and processing.
+    
+    Attributes
+    ----------
     name: str
-    """A name for the dataset (default: "")"""
+        A name for the dataset (default: "")
     data: list
-    """The processed data."""
+        The processed data.
     analysis: dict
-    """Group level analysis of processed data."""
+        Group level analysis of processed data.
+
+    """
+    name: str
+    data: list
+    analysis: dict
     
     def __init__(self, name="", dataObjs=[]):
         self.name = name
@@ -251,40 +333,48 @@ class DataSet:
 class Operator:
     """A processing operator that operates on a discrete chunk of data which either is broadcastover/reduces a data set. The result is stored in the DataType object in a channel indexed as a dictionary and specified by this operator. 
     
-
-    Usage: Operator(function, channels, arguments, inter)
-        To specify the function:
-        function = {"name": name of the function,
-                    "package": e.g numpy.random,
-                    "version": blank if installed package / directory of user defined function}
-        
-        channels ={{"dataIndex": {"Layer": ["Channel1", "Channel2", etc]}, {"Layer2": ["Channel0"]}}, 
-                    {"resultIndex": {"Layer": ["SingleChannel"]}}}
-        
-        arguments = {"unnamed" = [], "alpha": 0, "beta": 1}
-
-        inter = {}, {"broadcast": True}
-        The default is to apply the operator to the function channel as is but occasionally you might want to broadcast over a list of elements in the channel e.g. doing a spin correction.
-
-    """
+    Attributes
+    ----------
     opName: str
-    """A local understandable name."""
+        A local understandable name.
     description: str
-    """A description of what the operator does."""
+        A description of what the operator does.
     name: str
+        Name of the function.
     basePackage: str
-    """Give the package name."""
+        The package name.
     packageDir: str
     version: str
-    """Give the version number for the locally installed package. If the function is self defined then provide the relative directory."""
+        Give the version number for the locally installed package. If the function is self defined then provide the relative directory.
     arguments: dict
-    """The arguments required to run the operator. Unnamed arguments should be assigned to the dictionary entry unnamed."""
+        The arguments required to run the operator. Unnamed arguments should be assigned to the dictionary entry unnamed.
     internal: dict
-    """A dictionary of internal operating requirements e.g. broadcast, reduce. Broadcast and reduce will always be applied to the first index of the data channels"""
+        A dictionary of internal operating requirements e.g. broadcast, reduce. Broadcast and reduce will always be applied to the first index of the data channels.
     channelsIn: list
-    """The shape of the container of the incoming data. The first entry specifies the layer on which the operator should function"""
+        The shape of the container of the incoming data. The first entry specifies the layer on which the operator should function.
     channelOut: list
-    """The shape of the container of the returned data."""
+        The shape of the container of the returned data.
+    json: list
+        A JSON object storing the object.
+
+    Notes
+    -----
+    The default is to apply the operator to the function channel as is but occasionally you might want to broadcast over a list of elements in the channel e.g. doing a spin correction. To specify the function:
+    - function = {"name": name of the function, "package": e.g numpy.random, "version": blank if installed package / directory of user defined function}
+    - channels ={{"dataIndex": {"Layer": ["Channel1", "Channel2", etc]}, {"Layer2": ["Channel0"]}}, {"resultIndex": {"Layer": ["SingleChannel"]}}}
+    - arguments = {"unnamed" = [], "alpha": 0, "beta": 1}
+    - inter = {}, {"broadcast": True}
+    """
+    opName: str
+    description: str
+    name: str
+    basePackage: str
+    packageDir: str
+    version: str
+    arguments: dict
+    internal: dict
+    channelsIn: list
+    channelOut: list
     json: list
     def __init__(self, name=str, description=str, function=dict, channels=dict, args=dict, inter={}):
 
@@ -343,7 +433,9 @@ class Operator:
         self.internal = inter
         self.json = {"function": function, "channels": channels, "args": args, "inter": inter} 
     def __call__(self, data, ret=True):
-        """The operator can be used to operate on a datum by specifying the data layers and channels. The data will be stored in a strictly ordered vector which will be passed as a tuple to the function which defines the operator with the order being inherited from the order used to specify the channels. The result is stored in a single channel in a layer specified by the `channelOut` field."""
+        """The operator can be used to operate on a datum by specifying the data layers and channels. 
+
+        The data will be stored in a strictly ordered vector which will be passed as a tuple to the function which defines the operator with the order being inherited from the order used to specify the channels. The result is stored in a single channel in a layer specified by the `channelOut` field."""
 
         if self.packageDir == "":
             pkg = importlib.import_module(self.basePackage)
@@ -458,7 +550,19 @@ class Operator:
 
 # # # Piping
 def _preprocess(recipe, bidsdir):
-    """Apply a preprocessing pipeline to a directory of data in the BIDS standard. Currently only command line based preprocessing pipes are supported. A user defined pipeline can be specified using a series of operators on a list of directories."""
+    r"""
+    Apply a preprocessing pipeline to a directory of data in the BIDS standard. Currently only command line based preprocessing pipes are supported. A user defined pipeline can be specified using a series of operators on a list of directories.
+    
+    Parameters
+    ----------
+    recipe : graphpype.pipe.recipe
+    bidsdir : string
+        The location of the bidsdir
+
+    Returns
+    -------
+    None
+    """
     
     assert "preProcess" in recipe.nodes, "You need to specify the preprocessing operations." 
     
@@ -472,6 +576,24 @@ def _preprocess(recipe, bidsdir):
             [f(bidsdir) for f in ops]
 
 def _process(ops, dataset, nthreads: int, pool=None):
+    r""" 
+    Process a series of operators over a dataset.
+
+    Parameters
+    ----------
+    ops : list
+        A list of graphpype.pipe.operator objects that operate on the data.
+    dataset : graphpype.pipe.dataset
+        The dataset to be processed.
+    nthreads : int, optional
+        Number of threads to distribute over.
+    pool : object, optional
+    
+    Returns
+    -------
+    None
+    """
+
     if nthreads > 1:
       #  import multiprocessing
       #  for f in ops:

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>graphpype &mdash; GraphPype 0.1 documentation</title>
+  <title>GraphPype &mdash; GraphPype 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -18,10 +18,11 @@
         <script src="_static/documentation_options.js?v=2709fde1"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="graphpype package" href="graphpype.html" />
+    <link rel="next" title="GraphPype" href="graphpype.html" />
     <link rel="prev" title="Welcome to GraphPype’s documentation!" href="index.html" /> 
 </head>
 
@@ -46,10 +47,12 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">graphpype</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="graphpype.html">graphpype package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GraphPype</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html">GraphPype</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 </ul>
 
         </div>
@@ -66,7 +69,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">graphpype</li>
+      <li class="breadcrumb-item active">GraphPype</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,31 +80,29 @@
            <div itemprop="articleBody">
              
   <section id="graphpype">
-<h1>graphpype<a class="headerlink" href="#graphpype" title="Link to this heading"></a></h1>
+<h1>GraphPype<a class="headerlink" href="#graphpype" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="graphpype.html">graphpype package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="graphpype.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="graphpype.html#module-graphpype.graph">graphpype.graph module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.anatNifti"><code class="docutils literal notranslate"><span class="pre">anatNifti()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.constructCovarianceAverageGraph"><code class="docutils literal notranslate"><span class="pre">constructCovarianceAverageGraph()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.constructMinSpanDensity"><code class="docutils literal notranslate"><span class="pre">constructMinSpanDensity()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.constructedDensityPermutationGraph"><code class="docutils literal notranslate"><span class="pre">constructedDensityPermutationGraph()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.covNifti"><code class="docutils literal notranslate"><span class="pre">covNifti()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.degreeCDF"><code class="docutils literal notranslate"><span class="pre">degreeCDF()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.degreeHistogram"><code class="docutils literal notranslate"><span class="pre">degreeHistogram()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.euclideanDistanceMatrix"><code class="docutils literal notranslate"><span class="pre">euclideanDistanceMatrix()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.featureDegreeDistribution"><code class="docutils literal notranslate"><span class="pre">featureDegreeDistribution()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.graphComposite"><code class="docutils literal notranslate"><span class="pre">graphComposite()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.graphSchemaFromComposites"><code class="docutils literal notranslate"><span class="pre">graphSchemaFromComposites()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.greedyModules"><code class="docutils literal notranslate"><span class="pre">greedyModules()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.louvainCommunities"><code class="docutils literal notranslate"><span class="pre">louvainCommunities()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.randomCommunityStochasticBlock"><code class="docutils literal notranslate"><span class="pre">randomCommunityStochasticBlock()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.randomSpin"><code class="docutils literal notranslate"><span class="pre">randomSpin()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.graph.wiringCost"><code class="docutils literal notranslate"><span class="pre">wiringCost()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="graphpype.html">GraphPype</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphs">Graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.anatNifti"><code class="docutils literal notranslate"><span class="pre">anatNifti()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.constructCovarianceAverageGraph"><code class="docutils literal notranslate"><span class="pre">constructCovarianceAverageGraph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.constructMinSpanDensity"><code class="docutils literal notranslate"><span class="pre">constructMinSpanDensity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.constructedDensityPermutationGraph"><code class="docutils literal notranslate"><span class="pre">constructedDensityPermutationGraph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.covNifti"><code class="docutils literal notranslate"><span class="pre">covNifti()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.degreeCDF"><code class="docutils literal notranslate"><span class="pre">degreeCDF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.degreeHistogram"><code class="docutils literal notranslate"><span class="pre">degreeHistogram()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.euclideanDistanceMatrix"><code class="docutils literal notranslate"><span class="pre">euclideanDistanceMatrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.featureDegreeDistribution"><code class="docutils literal notranslate"><span class="pre">featureDegreeDistribution()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.graphComposite"><code class="docutils literal notranslate"><span class="pre">graphComposite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.graphSchemaFromComposites"><code class="docutils literal notranslate"><span class="pre">graphSchemaFromComposites()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.greedyModules"><code class="docutils literal notranslate"><span class="pre">greedyModules()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.louvainCommunities"><code class="docutils literal notranslate"><span class="pre">louvainCommunities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.randomCommunityStochasticBlock"><code class="docutils literal notranslate"><span class="pre">randomCommunityStochasticBlock()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.randomSpin"><code class="docutils literal notranslate"><span class="pre">randomSpin()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphpype.html#graphpype.graph.wiringCost"><code class="docutils literal notranslate"><span class="pre">wiringCost()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="graphpype.html#module-graphpype.pipe">graphpype.pipe module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="graphpype.html#pipelines">Pipelines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.pipe.DataSet"><code class="docutils literal notranslate"><span class="pre">DataSet</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="graphpype.html#graphpype.pipe.DataSet.analysis"><code class="docutils literal notranslate"><span class="pre">DataSet.analysis</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="graphpype.html#graphpype.pipe.DataSet.data"><code class="docutils literal notranslate"><span class="pre">DataSet.data</span></code></a></li>
@@ -151,14 +152,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="graphpype.html#module-graphpype.stats">graphpype.stats module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="graphpype.html#statistics">Statistics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.compareDist"><code class="docutils literal notranslate"><span class="pre">compareDist()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.compareGroupDegreeMeans"><code class="docutils literal notranslate"><span class="pre">compareGroupDegreeMeans()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.covarianceMatrix"><code class="docutils literal notranslate"><span class="pre">covarianceMatrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.estimateDistancePermutation"><code class="docutils literal notranslate"><span class="pre">estimateDistancePermutation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.generalLinearModel"><code class="docutils literal notranslate"><span class="pre">generalLinearModel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.generatePermutations"><code class="docutils literal notranslate"><span class="pre">generatePermutations()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.graphNeuralNetwork"><code class="docutils literal notranslate"><span class="pre">graphNeuralNetwork()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.loadFeature"><code class="docutils literal notranslate"><span class="pre">loadFeature()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.modularOverlap"><code class="docutils literal notranslate"><span class="pre">modularOverlap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.modularZTest"><code class="docutils literal notranslate"><span class="pre">modularZTest()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.stats.multipleTTest"><code class="docutils literal notranslate"><span class="pre">multipleTTest()</span></code></a></li>
@@ -166,6 +166,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="graphpype.html#module-graphpype.utils">graphpype.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="graphpype.html#utility-functions">Utility Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.utils.distanceMat"><code class="docutils literal notranslate"><span class="pre">distanceMat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.utils.fetchAtlas"><code class="docutils literal notranslate"><span class="pre">fetchAtlas()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="graphpype.html#graphpype.utils.fmriprep"><code class="docutils literal notranslate"><span class="pre">fmriprep()</span></code></a></li>
@@ -190,7 +191,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to GraphPype’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="graphpype.html" class="btn btn-neutral float-right" title="graphpype package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="graphpype.html" class="btn btn-neutral float-right" title="GraphPype" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

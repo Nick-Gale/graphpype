@@ -1,17 +1,62 @@
+"""
+Statistics
+==========
+
+A collection of statistical functions that are useful to neuroimaging analysis. There are native implementations of less common functions such as modularOverlap, and API calls for more established protocols to packages such as statsmodels.
+"""
+
 import scipy, numpy, statsmodels, neuromaps, networkx, warnings
 from graphpype import utils
 def estimateDistancePermutation(graph, distanceDist):
+    r"""
+    Estimate the distribution of distances between edges of a target graph.
 
+    Parameters
+    ----------
+    graph : networkx.digraph
+        Target graph
+    distanceDist : list
+        Distribution of distances between registered nodes.
+
+    Returns
+    -------
+    distribution : list
+        The distance distribution.
+    av : float
+        Estimated mean distance.
+    err : float
+        Standard error of the mean distance.
+    """
     dist = numpy.zeros(len(graph.edges()))
     for i, e in enumerate(graph.edges()):
-        
         dist[i] = numpy.sqrt(numpy.sum((distanceDist[e[0]] - distanceDist[e[1]]) ** 2))
+
     av = scipy.mean(dist)
     err = scipy.stats.sem(dist)
     return dist, av, err
 
 def modularOverlap(modules1, modules2):
-    """Given a vector of module membership of nodes compute the modular overlap and return a z-transformed score. To compute the modular overlap compute the fraction of pairs of nodes that share a module in both groups i.e. a binary vector. Note: this is not a symetric relationship between partitions as the vectors will have different lengths based on which is chosen first. Return the mean/std of the vector."""
+    r"""
+
+    Computes the modular overlap between two graphs given their modular membership.
+    
+    Parameters
+    ----------
+    modules1 : list
+        The modular membership classes of graph one.
+    modules2 : list
+        The modular membership classes of graph two.
+
+    Returns
+    -------
+    overlap : float
+        The number of shared pairs in the modules normalised by the total number of possible pairs.
+
+    Notes
+    -----
+    Given a vector of module membership of nodes compute the modular overlap and return a z-transformed score. To compute the modular overlap compute the fraction of pairs of nodes that share a module in both groups i.e. a binary vector. Note: this is not a symetric relationship between partitions as the vectors will have different lengths based on which is chosen first.
+    """
+
     modules = [[sorted(k) for k in i] for i in [modules1, modules2]]
     statistic = 0 
     for modi in modules[0]:
@@ -24,11 +69,28 @@ def modularOverlap(modules1, modules2):
     return statistic / totalPairs
 
 def modularZTest(*modules):
-    """ """
+    r"""
+    Compute the z-scores of each graph in the dataset with respect to the distributions defined by the modular overlap with a null distribution.
+    
+    Parameters
+    ----------
+    modules : list
+        A vector of graph modules and corresponding modules of graphs sampled from null-models induced by the graphs. Each element of the list stores the graph modules in its first index and the null-model modules in its second index.
+
+    Returns
+    -------
+    zstats : numpy.ndarray
+        A matrix of z-transformed modular overlap comparison between a list of graphs.
+
+    Notes
+    -----
+    Each graph ..math::`G_i` of has a set of modules ..math::`{M_k}_k^_N` that can be measured against a null-model sample to define a pseudo-distribution. The modular overlap can be computed against another graph ..math::`G_j` and this modular overlap can be compared against the distribution of modular overlaps defined by the null model to compute a z-score. Each graph can be compared in this manner to generate a matrix of z-transformed modular overlaps.
+
+    """
     L = len(modules)
     zstats = numpy.zeros((L, L))
     for i in range(L):
-        dist = [modularOverlap(modules[i][0], k) for k in modules[i][1]]
+        dist = [modularOverlap(modules[i][0], k) for k in modules[i][1]] # modules[i][0] defines the graph, modules[i][1] defines the distribution.
         for j in range(L):
             if i == j:
                 zstats[i, j] = -1
@@ -38,7 +100,29 @@ def modularZTest(*modules):
     return zstats
 
 def pairgroupModularZTest(*modules, correction="FDR", threshold=0.025):
-    """Compute the modular overlap of each of the measured populations and each paired sample from the null model. The z-test then computes Z values for each paired difference of the modular overlap of each pair of groupings when compared against the paired difference of distributions in each pair of groupings. These p-values are corrected (default: FDR) and returned as a matrix of pairs of the paired groupings and the signficance values are reported. """
+    """
+    Return the corrected statistically significant paired difference modular overlap.
+
+    Each graph in each dataset induces a null-model which can be used for z-statistics. The differences between graphs z-scores in each dataset can be compared against the differences in the null-models z-scores and corrected for multiple hypothesis testing.
+
+    Parameters
+    ----------
+    modules : list
+        List of modules in a graph and the modules and a sample from the null-model induced by the graph. The graph modules are in the first index of each element and the distribution the seond.
+    correction : string
+        The multiple hypothesis testing correction procedure. Defaults to "FDR"
+    threshold : float
+        The threshold for significance for the multiple hypothesis test
+
+    Returns
+    -------
+    pvals : numpy.ndarray
+        A matrix of the corrected p-values for each graphical element being compared.
+
+
+    Notes
+    -----
+    Compute the modular overlap of each of the measured populations and each paired sample from the null model. The z-test then computes Z values for each paired difference of the modular overlap of each pair of groupings when compared against the paired difference of distributions in each pair of groupings. These p-values are corrected (default: FDR) and returned as a matrix of pairs of the paired groupings and the signficance values are reported. """
     
     L = len(modules)
     N = [len(modules[i][1]) for i in range(len(modules))]
@@ -77,8 +161,26 @@ def pairgroupModularZTest(*modules, correction="FDR", threshold=0.025):
 
     return pval.reshape(L*L, L*L), sig.reshape(L*L, L*L)
 
-def compareGroupDegreeMeans(*data, channel="", correction="FDR", threshold=0.05):
-    """Returns the pairwise t-test between a list of data for each degree in a groupwise graph. These tests are corrected and significant degrees are reported."""
+def compareGroupDegreeMeans(*data, correction="FDR", threshold=0.05):
+    r"""
+    Returns the corrected p-values for a pairwise t-test between a list of data for each degree in a groupwise graph. 
+    
+    Parameters
+    ----------
+    data : list
+        A list of processed data with associated channels along the degree of the graph.
+    correction : string
+        The multiple hypothesis test correction.
+    threshold : float
+        The threshold value for the multiple hypothesis test.
+
+    Returns
+    -------
+    pvals : dict
+        A dictionary for the corrected p-values for each of the provided channels
+
+
+    """
     # This function isn't particularly elegant
     M = max([max([len(i) for i in d]) for d in data])
     
@@ -122,7 +224,26 @@ def compareGroupDegreeMeans(*data, channel="", correction="FDR", threshold=0.05)
     return res
 
 def compareDist(dist1, dist2, test='Kolmogorov-Smirnov'):
-    """Assesses the degree to which two empirical distributions are statistically different. There are some common ways of doing this: assuming the degree distribution takes a specific functional form, or the general Kolmogorov-Smirnov test. Support is provided for degree distributions assumed to be in the power-law form or the Kolmogorov-Smirnov through the `test` keyword  (default `test='Kolmogorov-Smirnov'`)"""
+    r"""
+    Assesses the degree to which two empirical distributions are statistically different. 
+    
+    Parameters
+    ----------
+    dist1 : distribution
+        A representation of a distribution i.e. a list of floats, numpy array, or a `statsmodels` distribution
+    dist2 : distribution
+    test : string
+        The test specification.
+    
+    Returns
+    -------
+    test : float
+        Test result
+
+    Notes
+    -----
+    There are some common ways of doing this: assuming the degree distribution takes a specific functional form, or the general Kolmogorov-Smirnov test. Support is provided for degree distributions assumed to be in the power-law form or the Kolmogorov-Smirnov through the `test` keyword  (default `test='Kolmogorov-Smirnov'`)
+    """
 
     # assert type is list of integers, or two ecdfs
     assert (type(dist1) == list or type(dist1) == numpy.ndarray or type(dist1) == statsmodels.distributions.emperical_distribution), "The first distribution should have a type: list, numpy array, or ecdf"
@@ -134,22 +255,25 @@ def compareDist(dist1, dist2, test='Kolmogorov-Smirnov'):
             return scipy.stats.ktest(dist1, dist2)
 
 
-def generatePermutations(datum, n, method='degree', seed=0):
-    """Generate a random set of permutations for a given adjacency matrix that serve as a null-model distribution under some assumption i.e. preserving degree distribution. Currently supported options are: 'degree', 'spin', 'random'. Degree distributions are generated using the FILLTHISIN method from FILLTHISINPACKAGE/PAPER. Spin models follow the structure presented by Block et. al. and implemented in FILLTHISINPACKAGE. Random assumes no structure and provides random permutations of the matrix."""
-    
-    A = datum.adjacency
-    L = A.shape[0] 
-
-    match method:
-        case 'degree':
-            ds = numpy.array(sorted([d for n, d in datum.graph.degree()], reverse=True))
-            adjs = [networkx.configuration_model(ds, seed=(seed+i)).adjacency.todense() for i in range(n)]
-        case 'spin':
-            adjs = []
-    return adjs
-
 def covarianceMatrix(*data, normalise=True):
-    """Returns the covariance matrix (size: L x L) of a data distributed amongst a particular parcellation (size: L) for a particular dataset (size: N). The default behavior is to normalise by standard deviations returning the regular Pearsons correlation coefficient."""
+    r"""
+    Generates the covariance matrix from a given parcellation size on a particular dataset.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Data with dimensions (N,L) for single estimate data, or (N,L,T) for time series data.
+    normalise : bool
+        Option to normalise the data; default = true.
+    
+    Returns
+    -------
+    covariance : numpy.ndarray
+        Covariance matrix
+
+    Notes
+    -----
+    Returns the covariance matrix (size: L x L) of a data distributed amongst a particular parcellation (size: L) for a particular dataset (size: N). The default behavior is to normalise by standard deviations returning the regular Pearsons correlation coefficient."""
     dims = numpy.shape(data[0][0]) # L the dimension of the parcellation, y the dimension of the data e.g. single estimate or a time series
     if len(dims) == 1:
         L = dims[0]
@@ -191,17 +315,25 @@ def covarianceMatrix(*data, normalise=True):
 
     return mat
 
-def loadFeature(*data):
-
-    data = [i[0] for i in data] # not sure about this
-    assert len(numpy.shape(data[0])) == 1
-
-    dataMat = numpy.array(data).transpose()
-    
-    return dataMat
-
 def multipleTTest(*data, threshold=0.025, correction="FDR"):
+    r"""
 
+    Perform a standard multiple t-test comparison with correction.
+
+    Parameters
+    ----------
+    data : list
+        The data to be examined.
+    correction : string
+        The multiple hypothesis testing correction procedure.
+    threshold : float
+        The statistical signficance threshold.
+    
+    Returns
+    -------
+    results : dict
+        Dictionary of names or numerical identity of the data with each entry being a dictionary summarising the test with keys: pvals, signficance, and idxs. Idxs indicates the the degree.
+    """
     ndata = len(data)
     
     names = range(ndata)
@@ -237,8 +369,35 @@ def multipleTTest(*data, threshold=0.025, correction="FDR"):
     return res
 
 
-def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[], link=None, test='none', flatten=True):
+def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[], link=None, flatten=True):
+    r"""
+    Fits a general linear model to the data on given covariate and regressor channels in the data.
     
+    Parameters
+    ----------
+    data : graphpype.pipe.dataset
+        The data to be regressed on.
+    sets : list
+        The dataset names or indexes to regress on; an empty list implies regression on a single dataset.
+    covariateChannels : list
+        The data channels asscociated with the covariates.
+    regressorChannels : list
+        The data channels asscociated with the regressors.
+    link
+        The link function.
+    flatten : bool
+        Flatten data into a single vector if no sets are provided.
+    
+    Returns
+    -------
+    fit : dict
+        Dictionary indexed on the dataset string/index containing the covariate/regressor fit between those datasets.
+
+    Notes
+    -----
+    fit[x][y]["model"] is the fit asscociated between the covariates on dataset `x` and the regressors on dataset `y`.
+
+    """
     if sets == []:
         # regressing on a single data set
         if flatten:
@@ -287,19 +446,27 @@ def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[
 
 def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
     """Generalised graph neural networks API call to abstract arbitrary graph data formats and train them following the tfgnn GraphTensor structure.
+    
+    Parameters
+    ----------
+    data : graphpype.pipe.dataset
+        The complete dataset to be trained on.
+    graphComposites : list
+        The graph graph composites specifing training channels and edge features.
+    network : dict
+        The neural network architecture.
+    learningTask : dict
+        The hyperpameters that define how the model is to be trained: optimiser, epochs, validation, batchsize, loss/task.
 
-    Usage:
+    Returns
+    -------
+    trained
+        Trained Tensorflow network.
 
-    The data is treated as a dataset and a dictionary of "graphs" are passed per subject and the node and edge sets in the GraphTensor. Each graph is attached to a keyword e.g. "fmri" or "adjacency" and each of these can hold feature lists for every graph in the data in both the edges and the nodes. Currently, these graphs are considered to be independent i.e. there are assumed to be no edges between each keyword although in principle there is nothing stopping links between, for example, gene regulatory networks and fmri images. The data is specified as a total dataset at either the analysis or dataset level. 
+    Notes
+    -----
 
-    Graph composites are in the form of a dictionary and specify the channel of the graph, the channels where the node features are derived, and the channels where the edge features are derived. These are used to derive the subgraphs and features extracted from each datum in the dataset to combine into the final graphTensor representing the entire dataset.
-
-    `network` specifies the architecture of the graph neural network i.e. the message parsing format and the number of message passes to make. The final layer must be a dense network to the feature size of the learning context.
-
-    `learningTask` specifies the learning task. It is composed of a dictionary that specifies the training split (by dataset, or by percentage), the optimiser, the epochs, the batch, etc. Example: learningTask = {task: {name: "name", parameters: params...}, batchSize=32, nEpochs: 5, validationsPerEpoch: 2, optimizer: "Adam"}
-:w
-
-    The output is a trained keras model which can be used for inference.
+    The data is treated as a dataset and a dictionary of "graphs" are passed per subject and the node and edge sets in the GraphTensor. Each graph is attached to a keyword e.g. "fmri" or "adjacency" and each of these can hold feature lists for every graph in the data in both the edges and the nodes. Currently, these graphs are considered to be independent i.e. there are assumed to be no edges between each keyword although in principle there is nothing stopping links between, for example, gene regulatory networks and fmri images. The data is specified as a total dataset at either the analysis or dataset level. Graph composites are in the form of a dictionary and specify the channel of the graph, the channels where the node features are derived, and the channels where the edge features are derived. These are used to derive the subgraphs and features extracted from each datum in the dataset to combine into the final graphTensor representing the entire dataset.
     """
     import tensorflow
     import tensforlow_gnn as tfgnn
