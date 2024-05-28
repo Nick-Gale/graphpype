@@ -16,13 +16,22 @@ Requires-Dist: networkx
 Requires-Dist: statsmodels
 Requires-Dist: neuromaps
 
-# NetworkAnalysis
-An analysis pipeline for complex network data focusing on brain imaging data.
+# GraphPype
+An analysis pipeline for complex network analysis ob brain imaging data. There is a focus on reproducible results and to ensure this a recipe template has been designed to incorporate both a workflow and the dependencies of the workflow (package version numbers, software dependencies, etc.). This workflow is not yet containerised but may be done on the user end using container software (e.g. Docker) or a package such as [Neurodesk](https://www.nature.com/articles/s41592-023-02145-x).
 
 ## Installation
+A basic development install can now be performed by downloading the editable install script into a local directory and then running `bash editableInstall.sh`. This will download and install the current version in a virtual enviroment. The changes should be editable. To use run `source venv/bin/activate` to activate the virtual enviroment the install is located in. 
 
 ### Dependencies
+Currently, the package relies on numpy, scipy, statsmodels, networkx, and pandas.
 
 ## Basic Usage
+A pipeline is constructed with Operators and two essential data structures: Datum and DataSet. There are several stages in the pipeline: preProcess, postProcess, analysis, and postAnalysis. The preProcess stage of chain specifies the location of any files and any dataloading operations. The Datum objects live at the preProcess/postProcess level of the chain and consist of references to where imaging data is located, any preprocessing pipeline used to convert them into workable objects (e.g. numpy arrays), and processing specific to individual data points. Dataloading operators also live at this level. The data are collected into DataSets which are named e.g. ASD, neurotypical, Parkinsons etc. These DataSets may be processed in the analysis stage with global functions e.g. mean. Finally, in the case of multiple datasets, these are composed as a DataSet of DataSets and between group processing may be performed e.g. groupwise comparisons. Output operators also live on this final analysis level e.g. plotting, saving. Process a Datum, analyse a DataSet is the general rule with DataSets being composable.
+
+The Operator type specifies the operation being performed on the data with fields referencing: code location (package or local script), function name, the data channels (in/out) through which it operates, the arguments it requires, and any internal arguments. The data channels refer to where the data is located: preProcess, postProcess, analysis, postAnalysis. The data channels all have names and specifying these name give the primary vector of operation to an operator e.g. operate on the graphs and thicknesses of these subjects. The data out channel specifies where the result should go e.g. is it a new object specific to the subject being processed (e.g. a graph in postProcess) or is it an analysis operation (e.g. mean degree distribution in analysis). The arguments are a dictionary given which specifices, by key, the keyword argumnets and in the case of unnamed arguments by a special keyword: "unnamed". Finally, internal arguments specify broadcasting (this is done on the first provided channel of the data input via broadcast), splitting outputs into multiple channels (these are specified numerically by concatenating a string and argument location via "split"), and global seeds (default: 1).
+
+## Reproducibility
+The recipe format is [BIDS](https://bids.neuroimaging.io/) compliant so should be suitable for drop-in analysis in conjunction with BIDS datasets. A recipe may also be shared as a JSON object and an analysis pipeline can be constructed and executed from these objects. In this way, parameters and seed objects are front-loaded even in complicated workflows and are apparent to researchers working in a shared version-controlled environment. This reduces parameter creep and deviations between versions of analyses performed at multiple stages and between multiple people e.g. in a large project or peer-review process. It is also more lightweight than a fully containerised solution making it good for prototyping and identifying and tracking code stability issues such as compiler/architecture/package differences in the early stages of a project.
 
 ## Documentation
+

@@ -180,12 +180,49 @@ class Recipe:
     description: str
     nodes: dict 
     env: dict
-    def __init__(self, name: str="", description: str="", nodes: dict={}, env: dict={"seed": 1, "nThreads": 1}):
-        """Initialise a (potentially empty) recipe card with a name and descriptor."""
+    def __init__(self, name: str="", description: str="", nodes: dict={}, env: dict={"seed": 1, "nThreads": 1}, template=""):
+        """Initialise a (potentially empty) recipe card with a name and descriptor.
+
+        Some templates are provided: empty, nipype, and full.
+
+        Parameters
+        ----------
+        name : str
+        description : str
+        nodes : dict
+            The nodes of the recipe expressed as graphpype.Operator objects in dictionary labels: preProcess, postProcess, analysis, postAnalysis
+        env : dict
+            Specifies any environment variables such as seed, or number of threads.
+        template : str
+            Generates a template recipe from the 'templates' directory.
+        """
+
         self.name = name
         self.description = description
         self.nodes = nodes
         self.env = env
+        
+        if template != "":
+            assert template in ["empty", "full", "nipype"], "Please provide a valid template."
+            # get the templates path
+            import sys
+            srcPath = sys.modules["graphpype"].__file__[0:-11]
+            templatePath = srcPath + "../../templates/" + template + ".json"
+            
+            import json
+            with open(templatePath, 'r') as f:
+                recipe = json.load(f) 
+            
+            self.name = recipe["name"]
+            
+            self.description = recipe["description"]
+            
+            self.nodes = {}
+            for n in recipe["nodes"]:
+                ops = [Operator(**i) for i in recipe["nodes"][n]]
+                self.nodes[n] = ops
+            
+            self.env = recipe["env"]
 
     def report(self, data):
         """Generate a report card summarising the recipe"""
@@ -544,7 +581,6 @@ class Operator:
             if ret:
                 return data
 
-# TO DO
 
 # Functions
 
