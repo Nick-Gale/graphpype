@@ -180,15 +180,120 @@ class Recipe:
     description: str
     nodes: dict 
     env: dict
-    def __init__(self, name: str="", description: str="", nodes: dict={}, env: dict={"seed": 1, "nThreads": 1}):
-        """Initialise a (potentially empty) recipe card with a name and descriptor."""
+    def __init__(self, name: str="", description: str="", nodes: dict={}, env: dict={"seed": 1, "nThreads": 1}, template=""):
+        """Initialise a (potentially empty) recipe card with a name and descriptor.
+
+        Some templates are provided: empty, nipype, and full.
+
+        Parameters
+        ----------
+        name : str
+        description : str
+        nodes : dict
+            The nodes of the recipe expressed as graphpype.Operator objects in dictionary labels: preProcess, postProcess, analysis, postAnalysis
+        env : dict
+            Specifies any environment variables such as seed, or number of threads.
+        template : str
+            Generates a template recipe from the 'templates' directory.
+        """
+
         self.name = name
         self.description = description
         self.nodes = nodes
         self.env = env
+        
+        if template != "":
+            assert template in ["empty", "full", "nipype"], "Please provide a valid template."
+            # get the templates path
+            import sys
+            srcPath = sys.modules["graphpype"].__file__[0:-11]
+            templatePath = srcPath + "../../templates/" + template + ".json"
+            
+            import json
+            with open(templatePath, 'r') as f:
+                recipe = json.load(f) 
+            
+            self.name = recipe["name"]
+            
+            self.description = recipe["description"]
+            
+            self.nodes = {}
+            for n in recipe["nodes"]:
+                ops = [Operator(**i) for i in recipe["nodes"][n]]
+                self.nodes[n] = ops
+            
+            self.env = recipe["env"]
 
-    def report(self, data):
-        """Generate a report card summarising the recipe"""
+    def report(self, bids, author=""):
+        """Generate a report card summarising the recipe.
+        
+
+        """
+
+        # generate XML table
+
+        # need to have: name description block. Data summary block. Operator sub blocks. Flow chart.
+        
+
+        titleStr = "# graphpype Recipe : " + self.name + "/n"
+
+        bodyStr = self.description + "/n"
+
+        import datetime as dt
+        dateStr = (dt.datetime.now(dt.UTC)).strftime('%Y-%m-%d')
+        if author == "":
+            authorStr = "not specified.".
+            warnings.warn("You haven't specified the author.")
+        endStr = "This report was generated on " + dateStr + ". The author was " + authorStr "./n"
+
+        block0 = titleStr + bodyStr + endStr
+        
+        # Data
+        dataStr = "## Data /n"
+        numberType = ""
+        for (dataSetName, directory) in bids.items():
+            subjPaths[dataSetName] = [ f.path for f in os.scandir(directory) if f.is_dir() and f.path[0:4] == 'sub-' ]
+            dotIndex = subPaths[0].rfind('.')
+            fileType = subjPaths[0][dotIndex::]
+            numberType += f"The " + dataSetName + "dataset is located in the directory " + directory ". There are {len(subjPaths)} files in this directory. These are of the file type " + fileType + "."
+        
+        block1 = dataStr + numberType
+        
+        # Operators
+        levelDict = {}
+        for n in self.nodes:
+            for level, val in n.channelOut.items()
+                levelDict[level].append(n)
+        lenO = []
+        operatorStr = "## Operators"
+        tableStr = ""
+        for level, operators in sels
+            lenO.append(len(operators))
+            operatorTitleStr = "### Operator Level: " + level + "/n"
+            operatorTableStr = "| Name | Description | Input: Data Channels (Level) | Output: Data Channels (Level) | /n"
+            operatorDivider = "| --- | --- | --- | --- | /n"
+            nodeStr = ""
+            for n in operators:
+                nodeStr = "| " n.name + "| " + n.description + "| "
+                for (key, val) in n.channelsIn:
+                    for v in val:
+                        nodeStr += v + " (" + key + "), "
+                nodeStr += "| /n"
+
+                for (key, val) in n.channelOut
+                    for v in val:
+                        nodeStr += v + " (" + key + "), "
+                nodeStr += "| /n"
+                nodeStr += operatorDivider
+            tableStr += operatorTitleStr + operatorTableStr + operatorDivider + nodeStr
+        
+        nNodesStr = f"There are {lenO[0]} pre-processing operators, {len(postProcessNodes)} post-processing operators {len(analysisNodes)} analysis operators, and {len(postAnalysisNodes)} post-Analysis operators,"
+        
+        block2 = operatorStr + nNodesStr + tableStr
+
+        #Flowchart
+
+        flowchart = graphpype.utils.generateFlowchart(self)
 
             ### DO THIS ###
     def write(self, outputDir):
@@ -544,7 +649,6 @@ class Operator:
             if ret:
                 return data
 
-# TO DO
 
 # Functions
 
