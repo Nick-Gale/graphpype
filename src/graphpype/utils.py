@@ -9,6 +9,38 @@ A collection of utility functions that allow graphpype to operate but are not sp
 import sys, os, numpy, subprocess, pickle, inspect, shutil
 from graphpype import pipe
 
+def generateFlowchart(recipe):
+    r"""Generate a flow chart of a given recipe.
+
+    Parameters
+    ----------
+    recipe : graphpype.pipe.Recipe
+
+    Returns
+    -------
+    flowchart : matplotlib.pyplot.plot
+    """
+    # Get the node types
+    preProcessNodes = recipes.nodes["preProcess"]
+    postProcessNodes = recipes.nodes["postProcess"]
+    analysisNodes = recipes.nodes["analysis"]
+    postAnalysisNodes = recipes.nodes["postAnalysis"]
+    
+    nodeNames = []
+    import networkx
+    G = networkX.DiGraph()
+    # Create the flow chart graph
+    for ops in recipes.nodes:
+        outLevel, outNodes = o.channelOut
+        for levelIn, j in o.channelOut:
+            for levelOut, i in o.channelsIn:
+                G.add_edge(i,j)
+                G.node[i]["level"] = levelIn
+                G.node[j]["level"] = levelOut
+    
+    colorMap = {"preProcess": "gold", "postProcess": 
+
+
 def generateTemplate(name="generic", exampleFile="generic.py"):
     r"""Autogenerate a template recipe to work from.
 
