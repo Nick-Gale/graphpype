@@ -16,7 +16,7 @@
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="_static/documentation_options.js?v=2709fde1"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -46,12 +46,22 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="graphpype.html">GraphPype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">GraphPype</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="gettingstarted.html">Getting Started</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">QuickStart</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">QuickStart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#recipes">Recipes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operators">Operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#constructing-example-recipes">Constructing Example Recipes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipelines">Pipelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datum-and-datasets">Datum and Datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallelism">Parallelism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="pipes.html">Recipes and Pipelines</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 </ul>
 
         </div>
@@ -81,9 +91,121 @@
              
   <section id="quickstart">
 <h1>QuickStart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h1>
-<p>Graphpype aims to create reproducible and shareable pipelines for analysis in neural imaging.</p>
-<p># Recipes</p>
-<p># Pipelines</p>
+<p>Graphpype aims to create reproducible and shareable pipelines for analysis in neural imaging. We aim to do this by introducing the concept of a recipe. The recipe is a shareable format which specificies how a particular analysis pipeline is to be run.</p>
+<section id="recipes">
+<h2>Recipes<a class="headerlink" href="#recipes" title="Link to this heading"></a></h2>
+<p>The recipe is composed of several fields each specifying the metadata of a particular aspect of the pipeline: <cite>name</cite>, <cite>description</cite>, <cite>nodes</cite>, <cite>env</cite>, and optionally <cite>template</cite>. A recipe is stored in a ‘.json’ format for portability and may be specified as such, but it is easier to build in a python session or python executable script and will result in less errors. We can start by initialising an empty recipe.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">graphpype</span>
+<span class="n">emptyRecipe</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">Recipe</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <cite>name</cite> and <cite>description</cite> fields are strings and are intended to be shorthand descriptors about the recipe for the end user. These can specified by keyword arguments or they can be built constructively.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">namedRecipe</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">Recipe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;An empty recipe&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A fairly useless description&quot;</span><span class="p">)</span>
+<span class="n">emptyRecipe</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Another empty recipe&quot;</span>
+</pre></div>
+</div>
+<p>The <cite>nodes</cite> field is a dictionary that contains the nodes of the graph that defines the pipeline. These are ordered into levels of analysis that are strictly ordered as: ‘preProcess’, ‘postProcess’, ‘analysis’, and ‘postAnalysis’. Each of these contains a list of <cite>Operators</cite> which are a graphpype class that defines an operation on a (possibly empty) set of  data. The list is read with left-to-right ordering which allows nodes on the same level to inter-operate. While rather strict, this formulation allows for a natural and portable expression of any generic analysis pipeline. Furthermore, expressing the pipeline as a graph opens the pipeline to analysis itself e.g. automatic differentiation through parameters would allow for sensitivity analysis which currently is not mainstream practice in neuroimaging studies.</p>
+<p>The recipe is a thus a coherent organisation of these operators that allow an analysis pipeline to transform raw data into a result: statistic, plot, or otherwise. These specifications are completely generic to any scientific analysis but the levels are chosen to closely align with neuroimaging. The preProcess level refers to individual raw data, the postProcess data refers to individual data that has gone through a processing to say, a graph, the analysis level which collates the results generated over a particular dataset, and postAnalysis which includes analysis between multiple datasets, plots, and output operators. These concepts of data will be formalised in Classes that graphpype provides in the following section.</p>
+</section>
+<section id="operators">
+<h2>Operators<a class="headerlink" href="#operators" title="Link to this heading"></a></h2>
+<p>The <cite>Operator</cite> class itself is quite complicated and defines a lot of information with arguments: <cite>name</cite>, <cite>description</cite>, <cite>function</cite>, <cite>channels</cite>, <cite>args</cite>, and <cite>inter</cite>. The name and description follow from the recipe and allow quick summaries of what each operator does. The <cite>function</cite> is a dictionary which specifies the name of the function, the package directory where the function is located (this could be a local module in which we encourage the local module to be the same directory as the recipe), local (a binary indicating whether the code is stored locally), and version (which is unecessary in the case of an installed package). The <cite>args</cite> is an optional dictionary of arguments that are passed to the function - it is key to note that if all arguments are not provided <cite>graphpype</cite> will rely on the defaults and will record these in the ‘.json’ specification. The <cite>channels</cite> is a dictionary specifiying the input and ouput locations of the data: these are specified by keys on a particular analysis level. The keys are “dataIndex” and “resultIndex”. These each contain a dictionary arranged into levels and a list of channels for each level which the operator will accept as input. The result index has only one channel. Finally, <cite>inter</cite> specifies internal arguments which are hyperparameters: for example specifying <cite>broadcast</cite> will broadcast the operator over the first data index rather than accepting a whole list. This can be useful for example if you have a list of vectors and want to find the mean of each of them, <cite>numpy.mean</cite> will return the global mean of the vector rather than returning the mean of each indivdiual vector.</p>
+<p>This method of specifying functions is labourious and can seem an unecessarily verbose way of specifying a simple function call. The advantage provided here is in the reproducibility: <cite>graphpype</cite> allows the correct version to be selected, the parameters to be front-ended (rather than buried or split between multiple scripts), and the whole recipe to be visualised as a graph allowing data dependencies to be exposed. The standardisation also allows for minimal changes to be made while building, debugging, and reproducing other work. Let’s specify a simple operator.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">graphpype</span>
+
+<span class="n">oMean</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">Operator</span><span class="p">(</span>
+             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Takes the mean of the wiring distance&quot;</span><span class="p">,</span>
+             <span class="n">function</span><span class="o">=</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+                       <span class="n">package</span><span class="p">:</span> <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+                       <span class="n">local</span><span class="p">:</span> <span class="mi">0</span>
+                       <span class="p">}</span>
+             <span class="n">channels</span><span class="o">=</span><span class="p">{</span><span class="n">dataIndex</span><span class="p">:</span> <span class="p">{</span><span class="n">postProcess</span><span class="p">:</span> <span class="s2">&quot;wiringDistance&quot;</span><span class="p">},</span>
+                       <span class="n">resultIndex</span><span class="p">:</span> <span class="p">{</span><span class="n">analysis</span><span class="p">:</span> <span class="s2">&quot;cost&quot;</span><span class="p">}</span>
+                       <span class="p">}</span>
+             <span class="n">args</span><span class="o">=</span><span class="p">{},</span>
+             <span class="n">inter</span><span class="o">=</span><span class="p">{}</span>
+             <span class="p">)</span>
+</pre></div>
+</div>
+<p>This is a simple operator that doesn’t require any input arguments or internal hyperparameters and at a glance appears to use the mean function in the <cite>numpy</cite> package to transform the wiring distance of a graph to a simple cost measure. When operated on the version of numpy recorded will be used and any unknown parameters e.g. <cite>axis</cite>. Then, if there was a conflict between recipes on different computers it might be resolved by comparing numpy versions and checking their releases for particular bugs. Also, if someone was reproducing a paper and didn’t realise that <cite>axis=1</cite> should be specified the json template would front-end the default specification of <cite>None</cite> which would aid in resolving the conflict.</p>
+</section>
+<section id="constructing-example-recipes">
+<h2>Constructing Example Recipes<a class="headerlink" href="#constructing-example-recipes" title="Link to this heading"></a></h2>
+<p>There are some standard operations that one might want to apply to their analysis pipeline. To help building a recipe we offer two methods: the template keyword and a function in the <cite>utils</cite> package.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">graphpype</span>
+<span class="n">recipeStandard</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">Recipe</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="s2">&quot;standard&quot;</span><span class="p">)</span>
+<span class="n">graphpype</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">generateTemplate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;generic&quot;</span><span class="p">,</span> <span class="n">exampleFile</span><span class="o">=</span><span class="s2">&quot;generic.py&quot;</span><span class="p">)</span>
+<span class="n">recipeRead</span> <span class="o">=</span> <span class="n">recipeStandard</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;path/to/recipe.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first method reads out from templates that are bundled within the graphpype package. The second method allows for a more abritary specification that immediately writes the recipe specified in a python script. Finally, the Recipe class provides a method <cite>read</cite> which accepts a directory from which a ‘.json’ file may be read from. Once we are happy with our recipe we may write it to disk using the <cite>write</cite> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">recipeStandard</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;path/to/recipe.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The resulting file now defines a portable recipe template. We might also like to get an idea of what our recipe actually does. A useful visualisation of the recipe is given by <cite>generateFlowchart</cite> in the <cite>utils</cite> package which will generate a visualation of the graph defining the recipe. There are default colours provided for each level of the analysis but these can be specified as a dictionary of named colours for customisation. If the data paths are known we can specify their name and paths as dictionary key values and graphpype provides the <cite>report</cite> method which will write a report as a html file summarising the data and operator chain. We have a data directory with two BIDS formatted subdirectory which we will label as “A” and “B”. Let’s generate a report card and a flowchart for this recipe and dataset.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">graphpype</span>
+<span class="n">recipeStandard</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">Recipe</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="s2">&quot;standard&quot;</span><span class="p">)</span>
+<span class="n">recipeStandard</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ourNewExample&quot;</span><span class="p">)</span>
+<span class="n">plotObj</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">generateFlowchart</span><span class="p">(</span><span class="n">recipeStandard</span><span class="p">)</span>
+<span class="n">plotObj</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">bidsDict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="s2">&quot;data/splitA&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="s2">&quot;data/splitB&quot;</span><span class="p">}</span>
+<span class="n">recipeStandard</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">recipe</span><span class="p">,</span> <span class="n">bidsDict</span><span class="p">,</span> <span class="n">outputDir</span><span class="o">=</span><span class="s2">&quot;./data/derivatives/&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;Your Name&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For some more examples of recipe templates refer to the Examples page in the documentation.</p>
+</section>
+<section id="pipelines">
+<h2>Pipelines<a class="headerlink" href="#pipelines" title="Link to this heading"></a></h2>
+<p>A recipe is a generic graph specifying the transformations of data and datasets toward a final result. A pipeline is the application of a recipe to a specific dataset or set of datasets. The <cite>Pipeline</cite> class is provided to construct and process analysis pipelines on a particular compute environment. There is an internal representation of data that the <cite>Pipeline</cite> class handles in the form of the <cite>Datum</cite> and <cite>Dataset</cite> classes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">graphpype</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">recipe</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span><span class="s1">&#39;./ourNewExample&#39;</span><span class="p">,</span> <span class="n">bids</span><span class="o">=</span><span class="n">bidsDict</span><span class="p">,</span> <span class="n">preprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="datum-and-datasets">
+<h2>Datum and Datasets<a class="headerlink" href="#datum-and-datasets" title="Link to this heading"></a></h2>
+<p>The <cite>Datum</cite> class is the atomic unit of the data and has three fields: dirs, preData, and postData. The dirs specifies the directory where raw data is kept. The preData refers to the channels of assigned to the preProcessing level. The postData analagously refers to the channels assigned to the postProcessing level. As an example, a Datum might refer to a subject which has had an fmri scan and DTI scan and has had this data stored in a BIDS directory under ‘subj-0001’. Some preprocessing might have been applied to the data to generate a FMRI time-series, and some post-processing on this preprocessed data to generate a covariance matrix and graphs.</p>
+<p>The <cite>DataSet</cite> class refers to a collection of either atomic units <cite>Datum</cite> or of <cite>DataSets</cite>. The fields are <cite>name</cite>, <cite>data</cite>, and <cite>analysis</cite>. The name field is for specification useful mainly when multiple datasets are used. The data field is simply a list of pointers to Datum objects, or Datasets. The <cite>analysis</cite> field is a dictionary which contains the results of operators which export to the analysis or postAnalysis levels.</p>
+<p>For the most part graphpype will automatically generate the Datum and Datasets typically through an operator. It is possible to individually manipulate the data but it is not recommended outside of exploratory analysis. We can specify the data objects by providing the BIDS directories.</p>
+</section>
+<section id="parallelism">
+<h2>Parallelism<a class="headerlink" href="#parallelism" title="Link to this heading"></a></h2>
+<p>Parallelism is internally handled in graphpype explicitly over lists of Datum or Dataset objects. There are some operators which have native graphpype implementations that utilise GPU acceleration and there is no restriction of parallelism (e.g. Freesurfer) from calls from other packages. The <cite>nthreads</cite> internal argument specifies the number of threads that can be used and assigns a dataset/datum to each thread and runs the operator over that thread before collection.</p>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<p>Let’s now crystalise this in a runnable example with our dataset of A and B. This assumes that you have <cite>graphpype</cite>, the relevant dependencies for fmri analysis, and python packages installed. It also assumes a data folder with the following structure:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>./data/</dt><dd><ul>
+<li><p>derivatives/</p></li>
+<li><p>splitA/
+-derivatives/</p></li>
+<li><p>splitB/
+-derivatives/</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>The following code block pulls a recipe template from the available options, writes the recipe in JSON format to the top level folder of your analysis, generates a HTML report summarising the recipe and a flowchart defining the analysis graph, and finally processes the pipeline of the recipe distributed over the two independent datasets labelled “A” and “B” and found in the “splitA” and “splitB” data directories.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">graphpype</span>
+
+<span class="n">recipeStandard</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">Recipe</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="s2">&quot;standard&quot;</span><span class="p">)</span>
+<span class="n">recipeStandard</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ourNewExample&quot;</span><span class="p">)</span>
+<span class="n">plotObj</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">generateFlowchart</span><span class="p">(</span><span class="n">recipeStandard</span><span class="p">)</span>
+<span class="n">plotObj</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">bidsDict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="s2">&quot;data/splitA&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="s2">&quot;data/splitB&quot;</span><span class="p">}</span>
+<span class="n">recipeStandard</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">recipe</span><span class="p">,</span> <span class="n">bidsDict</span><span class="p">,</span> <span class="n">outputDir</span><span class="o">=</span><span class="s2">&quot;./data/derivatives/&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;Your Name&quot;</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">recipe</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span><span class="s1">&#39;./ourNewExample&#39;</span><span class="p">,</span> <span class="n">bids</span><span class="o">=</span><span class="n">bidsDict</span><span class="p">,</span> <span class="n">preprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 

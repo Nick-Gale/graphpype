@@ -6,10 +6,10 @@ A collection of utility functions that allow graphpype to operate but are not sp
 
 """
 
-import sys, os, numpy, subprocess, pickle, inspect, shutil
+import sys, os, numpy, subprocess, pickle, inspect, shutil, nilearn
 from graphpype import pipe
 
-def generateFlowchart(recipe):
+def generateFlowchart(recipe, colorMap={"preProcess": "gold", "postProcess": "darkcyan", "analysis": "dodgerblue", "postAnalysis": "firebrick"}):
     r"""Generate a flow chart of a given recipe.
 
     Parameters
@@ -20,26 +20,49 @@ def generateFlowchart(recipe):
     -------
     flowchart : matplotlib.pyplot.plot
     """
-    # Get the node types
-    preProcessNodes = recipes.nodes["preProcess"]
-    postProcessNodes = recipes.nodes["postProcess"]
-    analysisNodes = recipes.nodes["analysis"]
-    postAnalysisNodes = recipes.nodes["postAnalysis"]
     
     nodeNames = []
     import networkx
-    G = networkX.DiGraph()
-    # Create the flow chart graph
-    for ops in recipes.nodes:
-        outLevel, outNodes = o.channelOut
-        for levelIn, j in o.channelOut:
-            for levelOut, i in o.channelsIn:
-                G.add_edge(i,j)
-                G.node[i]["level"] = levelIn
-                G.node[j]["level"] = levelOut
-    
-    colorMap = {"preProcess": "gold", "postProcess": 
+    import matplotlib.pyplot as plt
 
+    G = networkx.DiGraph()
+    # Create the flow chart graph, inelegant
+    nodes = []
+    for level in recipe.nodes:
+        for op in recipe.nodes[level]:
+            nodes.append(op)
+
+    levelKey = {"preProcess": 0, "postProcess": 1, "analysis": 2, "postAnalysis": 3}
+    colorMap = dict([(levelKey[k], colorMap[k]) for k in colorMap])
+    for op in nodes:
+        for levelOut in op.channelOut:
+            for levelIn in op.channelsIn:
+                for i in op.channelOut[levelOut]:
+                    G.add_node(i, level=levelKey[levelOut])
+                    for j in op.channelsIn[levelIn]:
+                        G.add_node(j, level=levelKey[levelIn])
+                        G.add_edge(j, i, function=op.name)
+   
+    nodes = list(G.nodes(data=True))
+    color = [colorMap[node[1]["level"]] for node in G.nodes(data=True)]
+    edge_labels = dict([((i, j,), e["function"]) for i,j,e in G.edges(data=True)]) 
+    pos = networkx.multipartite_layout(G, subset_key="level", align="horizontal", scale=2*len(nodes))
+    
+    # do some rescaling
+    max_scale = 0.5 * max([pos[k][0] for k in pos])
+    for k in pos:
+        pos[k][1] *= -max_scale
+        pos[k][1] += 1.5 * pos[k][0]
+
+    fig, ax = plt.subplots(figsize=(max_scale, max_scale))
+   # networkx.draw_networkx(G, pos, with_labels=False, node_size=2, alpha=0.1)
+    for level in levelKey:
+        sGnodes = [i for i in range(len(nodes)) if nodes[i][1]["level"] == levelKey[level]]
+        sGnodes = [node[0] for node in nodes if node[1]["level"] == levelKey[level]]
+        networkx.draw_networkx(G.subgraph(sGnodes), pos, width=0, alpha=1, node_color="white", with_labels=True,font_size=20, bbox=dict(facecolor=colorMap[levelKey[level]], edgecolor="black", boxstyle="round,pad=0.2", alpha=0.5))
+    networkx.draw_networkx_edges(G, pos, edge_labels, connectionstyle="arc3,rad=0.35", alpha=0.9)
+    networkx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, connectionstyle="arc3,rad=0.35")
+    return fig
 
 def generateTemplate(name="generic", exampleFile="generic.py"):
     r"""Autogenerate a template recipe to work from.
@@ -77,7 +100,7 @@ def generateTemplate(name="generic", exampleFile="generic.py"):
     
     return recipe
 
-def fetchAtlas(atlas="msdl", atlasDir="./data/atlases/"):
+def fetchAtlas(atlas="msdl", atlasDir="./data/derivatives/atlases/"):
     r"""Grabs an atlas using the NiLearn API. 
 
     The default atlas used is the 'msdl' atlas but this can be specified to work with any atlas available in the NiLearn database. The atlases are placed in the `data/atlases/` subdirectory of the BIDS directory.
@@ -91,6 +114,7 @@ def fetchAtlas(atlas="msdl", atlasDir="./data/atlases/"):
 
     Returns
     -------
+
     atlasObj : object
         The atlas objects contains the maps in the `maps` key and the labels in the `labels` key.
 
@@ -100,23 +124,23 @@ def fetchAtlas(atlas="msdl", atlasDir="./data/atlases/"):
 
     """
     # check the atlas exists
-    if os.path.exists(atlasDir + atlas):
-        atlasObj = loadObj(atlasDir + atlas)
+    if 1==2: # os.path.exists(atlasDir + atlas):
+        atlasObj = loadObject(atlasDir + atlas)
     else:
         # fetch the atlas and labels
-        funcStr = "datasets.fetch_atlas_" + atlas
-        funcFetch = getattr(nilearn, funcStr)
+        import nilearn
+        from nilearn import datasets as datasets
+        from nilearn import regions as regions
+        funcStr = "fetch_atlas_" + atlas
+        funcFetch = getattr(datasets, funcStr)
         atlasObj = funcFetch()
-        # seperate the regions into spatially continuous blocks (no left-right hemisphere symmetry for example)
-        atlasObj = connected_label_regions(atlasObj)
-        # atlasMaps = atlasObj["maps"]
-        # atlasLabels = atlas["labels"]
         
-        saveObj(atlasObj, atlasDir)
-
+        # seperate the regions into spatially continuous blocks (no left-right hemisphere symmetry for example)
+        # atlasObj = regions.connected_label_regions(atlasObj)
+        saveObject(atlasObj, atlasDir + atlas)
     return atlasObj
 
-def fmriprep(directory, fmriprep=[], participant=[], cache=True):
+def fmriprep(directory, fmriprep=[], participant=[], cache=True, stringAdd=""):
     r"""An API call to the fmriprep preprocessing package.
 
     All fMRI and structural data should be preprocessed before it can be converted into a graph datum object. The fmriprep API is a popular, but not unique method, of doing this. See also: freesurfer and nipype APIs. The fmriprep API call is constructed with a number of flags and a processed over a number of participant paths.
@@ -143,8 +167,8 @@ def fmriprep(directory, fmriprep=[], participant=[], cache=True):
     derivativesDirectory = directory + 'derivatives/'
     
     # find the participant labels
-    subsDerivative = [ f.path[len(derivativesDirectory):] for f in os.scandir(derivativesDirectory) if f.is_dir() and f.path[len(derivativesDirectory):][0:4] == 'sub-' ]
-    subs = [ f.path[len(directory):] for f in os.scandir(directory) if f.is_dir() and f.path[len(directory):][0:4] == 'sub-' ]
+    subsDerivative = [ f.path[len(derivativesDirectory):] for f in os.scandir(derivativesDirectory) if f.is_dir() and 'sub-' in f.path ]
+    subs = [ f.path[len(directory):] for f in os.scandir(directory) if f.is_dir() and 'sub-' in f.path ]
     
     # if no participants are labelled presume all participants are selected
     if participant == []:
@@ -164,7 +188,7 @@ def fmriprep(directory, fmriprep=[], participant=[], cache=True):
     
     # a non-empty subsProcess should be passed to fmriprep, else cache has been selected
     if subsProcess: 
-        cmdStr = ["fmriprep-docker", directory, derivativesDirectory, "participant"] + fmriprep + ["--participant-label"] + subsPaths
+        cmdStr = ["fmriprep-docker", directory, derivativesDirectory, "participant"] + ["--participant-label"] + subsProcess
         subprocess.run(cmdStr)
     else:
         print("Previously preprocessed participants have been detected in the BIDS/derivatives/ directory. These will be selected as the `cache` option is True. To reprocess these set `cache=False`")
@@ -184,7 +208,7 @@ def loadObject(directory):
     obj : object
 
     """
-    with open(directory, 'wb') as file:
+    with open(directory, 'rb') as file:
         obj = pickle.load(file)
     return obj
 
@@ -207,12 +231,15 @@ def saveObject(obj, directory):
     Warning
         Alert the user to non-BIDS compliance.
     """
-
+    import warnings
     if 'derivatives' not in directory:
         warnings.warn("The save path does not appear to be in the derivatives subdirectory. Remember to make sure that your analysis is BIDS compliant.")
+    
+    os.makedirs(os.path.dirname(directory), exist_ok=True)
 
     with open(directory, 'wb') as output:  # Overwrites any existing file.
         pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+        output.close()
 
 def loadParcellation(*totalDataset, dataDirectory="", listFilterDirectory="", channel="", nameFilter=False):
     r"""Load a pre-parcellated dataset which may be filtered into multiple datasets.
@@ -324,7 +351,7 @@ def distanceMat(data):
     mat = numpy.zeros((L,L))
     for i in range(L):
         for j in range(L):
-            mat[i,j] = numpy.sqrt(numpy.sum((data[i] - data[j]) ** 2))
+            mat[i,j] = numpy.sqrt(numpy.sum((numpy.array(data[i]) - numpy.array(data[j])) ** 2))
     return mat
 
 def vectorSlice(tensor, index, axis):
@@ -364,6 +391,5 @@ def plots(*data, plotsDir):
         if callable(f):
             res.append(f(*data))
             names.append(i) 
-
 
     return res, names

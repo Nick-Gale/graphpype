@@ -1,6 +1,9 @@
 GraphPype
 =================
 
+graphpype.pipe module
+---------------------
+
 .. automodule:: graphpype.graph
    :members:
    :undoc-members:

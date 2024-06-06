@@ -15,6 +15,7 @@ The major conceptual classes exported are:
 
 import importlib, warnings, os, time
 import subprocess 
+import graphpype
 # Constants
 
 # Classes
@@ -48,8 +49,8 @@ class Pipeline:
         subjPaths = {}
         if bids:
             for (dataSetName, directory) in bids.items():
-                subjPaths[dataSetName] = [ f.path for f in os.scandir(directory) if f.is_dir() and f.path[0:4] == 'sub-' ]
-            subjPaths[dataSetName].insert(0, directory)
+                subjPaths[dataSetName] = [ f.path for f in os.scandir(directory) if f.is_dir() and 'sub-' in f.path]
+                subjPaths[dataSetName].insert(0, directory)
         self.paths = subjPaths
 
     def process(pipe, dataSetNames=[], preProcess=True):
@@ -72,15 +73,17 @@ class Pipeline:
             for (dataSetName, paths) in pipe.paths.items():
                 # since the data is preprocessed it needs to be in the derivatives folder and paths must be accordingly modified
                 
-                directory = paths[0] + "derivatives/"
-                dataPaths = [ f.path for f in os.scandir(directory) if f.is_dir() and f.path[len(directory):][0:4] == 'sub-' ]
+                directory = paths[0] + "/derivatives/"
+                os.mkdir(directory) if (not os.path.isdir(directory)) else None
+                dataPaths = [ f.path for f in os.scandir(directory) if f.is_dir() and 'sub-' in f.path ]
                 ds=[]
                 for p in dataPaths:
                     dirsP = []
                     for o in pipe.recipe.nodes["preProcess"]:
-                        channel = o.channelOut["preProcess"][0]
-                        if "stringAdd" in o.arguments:
-                            string = p + o.arguments["stringAdd"]
+                        for key in o.channelOut:
+                            channel = o.channelOut[key][0]
+                        if "stringAdd" in o.args:
+                            string = p + o.args["stringAdd"]
                         else:
                             string = p
                         dirsP.append({"channel": channel, "string": string})
@@ -110,9 +113,10 @@ class Pipeline:
              
         if "postProcess" in pipe.recipe.nodes:
             ops = pipe.recipe.nodes["postProcess"]
-            res = _process(ops, analysisSet.data, pipe.recipe.env["nThreads"])
-            if res:
-                analysisSet.data = res
+            for data in analysisSet.data:
+                res = _process(ops, data.data, pipe.recipe.env["nThreads"])
+                if res:
+                    data.data = res
         
         if "analysis" in pipe.recipe.nodes:
             ops = pipe.recipe.nodes["analysis"]
@@ -192,7 +196,7 @@ class Recipe:
         nodes : dict
             The nodes of the recipe expressed as graphpype.Operator objects in dictionary labels: preProcess, postProcess, analysis, postAnalysis
         env : dict
-            Specifies any environment variables such as seed, or number of threads.
+           Specifies any environment variables such as seed, or number of threads.
         template : str
             Generates a template recipe from the 'templates' directory.
         """
@@ -224,78 +228,84 @@ class Recipe:
             
             self.env = recipe["env"]
 
-    def report(self, bids, author=""):
+    def report(self, bids, author="", outputDir="data/derivatives"):
         """Generate a report card summarising the recipe.
         
 
         """
-
-        # generate XML table
-
-        # need to have: name description block. Data summary block. Operator sub blocks. Flow chart.
+        assert outputDir[0] != '/', "Please use relative directories, not absolute."         
+        if not os.path.exists(outputDir):
+            os.mkdir(outputDir)
         
+        titleStr = "# graphpype Recipe : " + self.name + "\n" # + " <br> "
 
-        titleStr = "# graphpype Recipe : " + self.name + "/n"
-
-        bodyStr = self.description + "/n"
+        bodyStr = self.description + "\n"
 
         import datetime as dt
         dateStr = (dt.datetime.now(dt.UTC)).strftime('%Y-%m-%d')
         if author == "":
-            authorStr = "not specified.".
+            authorStr = "not specified"
             warnings.warn("You haven't specified the author.")
-        endStr = "This report was generated on " + dateStr + ". The author was " + authorStr "./n"
+        endStr = "\n<i>This report was generated on " + dateStr + ". The author was " + authorStr + ".</i> \n"
 
-        block0 = titleStr + bodyStr + endStr
+        block0 = titleStr + bodyStr + endStr + "\n"
         
         # Data
-        dataStr = "## Data /n"
+        dataStr = "## Data \n"
         numberType = ""
         for (dataSetName, directory) in bids.items():
-            subjPaths[dataSetName] = [ f.path for f in os.scandir(directory) if f.is_dir() and f.path[0:4] == 'sub-' ]
-            dotIndex = subPaths[0].rfind('.')
-            fileType = subjPaths[0][dotIndex::]
-            numberType += f"The " + dataSetName + "dataset is located in the directory " + directory ". There are {len(subjPaths)} files in this directory. These are of the file type " + fileType + "."
-        
-        block1 = dataStr + numberType
+            subjPaths = [ f.path for f in os.scandir(directory) if f.is_dir() and 'sub-' in f.path ]
+            numberType += "The " + dataSetName + " dataset is located in the directory " + directory + f". There are {len(subjPaths)} files in this directory."+ " <br> "
+        block1 = dataStr + numberType + " \n "
         
         # Operators
-        levelDict = {}
-        for n in self.nodes:
-            for level, val in n.channelOut.items()
-                levelDict[level].append(n)
         lenO = []
-        operatorStr = "## Operators"
+        operatorStr = "## Operators \n"
         tableStr = ""
-        for level, operators in sels
+        for level, operators in self.nodes.items():
             lenO.append(len(operators))
-            operatorTitleStr = "### Operator Level: " + level + "/n"
-            operatorTableStr = "| Name | Description | Input: Data Channels (Level) | Output: Data Channels (Level) | /n"
-            operatorDivider = "| --- | --- | --- | --- | /n"
+            operatorTitleStr = "\n### Operator Level: " + level + " \n"
+            operatorTableStr = "<table border=\"1px solid black\">\n<thead>\n<trow class=\"firstLine\">\n <th>Name</th>\n <th>Description</th>\n <th>Input: Data Channels (Level)</th>\n <th>Output: Data Channels (Level)</th>\n</tr>\n</thead>\n<tbody>"
+            # operatorDivider =  "| ---- | ----------- | ---------------------------- | ----------------------------- | \n <br>"
             nodeStr = ""
             for n in operators:
-                nodeStr = "| " n.name + "| " + n.description + "| "
-                for (key, val) in n.channelsIn:
-                    for v in val:
-                        nodeStr += v + " (" + key + "), "
-                nodeStr += "| /n"
+                nodeStr += "\n<tr>\n <td><i>" + n.name + "</i></td>\n <td>" + n.description + "</td>\n <td>"
+                for (key, val) in n.channelsIn.items():
+                    if val: 
+                        for v in val:
+                            nodeStr += "<i>" + v + "</i>" + " (" + key + "), "
+                    else:
+                        nodeStr += "N/A "
+                
+                nodeStr += "</td>\n <td>"
 
-                for (key, val) in n.channelOut
+                for (key, val) in n.channelOut.items():
                     for v in val:
-                        nodeStr += v + " (" + key + "), "
-                nodeStr += "| /n"
-                nodeStr += operatorDivider
-            tableStr += operatorTitleStr + operatorTableStr + operatorDivider + nodeStr
+                        nodeStr += "<i>" + v + "</i>" + " (" + key + "), "
+                nodeStr += "</td>\n</tr>"
+        #        nodeStr += operatorDivider
+            # tableStr += operatorTitleStr + operatorTableStr + operatorDivider + nodeStr + "\n" 
+            tableStr += operatorTitleStr + operatorTableStr + nodeStr + "</tbody>\n</table>\n" 
         
-        nNodesStr = f"There are {lenO[0]} pre-processing operators, {len(postProcessNodes)} post-processing operators {len(analysisNodes)} analysis operators, and {len(postAnalysisNodes)} post-Analysis operators,"
+        nNodesStr = f"There are {lenO[0]} pre-processing operators, {lenO[1]} post-processing operators {lenO[2]} analysis operators, and {lenO[3]} post-Analysis operators.\n"
         
-        block2 = operatorStr + nNodesStr + tableStr
-
+        block2 = operatorStr + nNodesStr + tableStr 
         #Flowchart
-
         flowchart = graphpype.utils.generateFlowchart(self)
+        flowchart.savefig(outputDir + "/flowchart.png")
+        chartTitle = "## Operational Flow Chart \n"
+        imgStr = "<img src=\"./flowchart.png\"><figcaption>Flowchart of the analysis pipeline generated by graphpype.</figcaption>"
+        block3 = chartTitle + imgStr 
+        # Convert markdown to HTML and save
+        markdownStr = block0 + " \n" + block1 + " \n" +  block2 +  " \n" + block3 + " \n"
+        
+        import markdown
+        htmlObj = markdown.markdown(markdownStr)
+        htmlDir = outputDir + "/reportCard.html" 
+        with open(htmlDir, 'w') as f:
+            f.write(htmlObj)
+        print("Check the output directory: " + outputDir)
 
-            ### DO THIS ###
     def write(self, outputDir):
         """
         Write the recipe to disk in .json format for use in pipelines.
@@ -311,12 +321,11 @@ class Recipe:
         """
         import json
         with open(outputDir, 'w') as f:
-            # print())
             # json_obj = {"name": self.name, "description": self.description, "nodes": sum([[j.json for j in self.nodes[i]] for i in self.nodes], []), "env": self.env}
             nNodes = {}
             for i in self.nodes:
                 nNodes[i] = [j.json for j in self.nodes[i]]
-
+            
             json_obj = {"name": self.name, "description": self.description, "nodes": nNodes, "env": self.env}
             json.dump(json_obj, f, ensure_ascii=False, indent=4)
     
@@ -353,21 +362,21 @@ class Datum:
 
     dirs: list
     List of the directories used for the specimen/subject in the analysis.
-    preData: dict
+    preProcess: dict
     Dictionary storing the preprocessed data from a particular pipeline such as prepfmri e.g. Dict["Connectivity"] = matrix
-    postData: dict
+    postProcess: dict
     Dictionary storing the processed data from a particular operator e.g. Dict["Connectivity"] = matrix
 
     """ 
 
     dirs: list
-    preData: dict
-    postData: dict
+    preProcess: dict
+    postProcess: dict
     
     def __init__(self, *directories):
         self.dirs = []
-        self.preData = {} 
-        self.postData = {} 
+        self.preProcess = {} 
+        self.postProcess = {} 
         # list the directories
         for d in directories:
             self.dirs.append(d["string"])
@@ -381,10 +390,11 @@ class Datum:
                 data = np.load(d["string"])
             elif channel == "fMRI" or channel == "fmri" or channel == "FMRI":
                 allNiFTi = [ f.path for f in os.scandir(d["string"]) if f.path[-6:] == 'nii.gz' ]
-                import nibabel 
+                import nibabel
                 if d["string"][-1] == '/':
                     print("No specific file selected in data subdirectory, choosing the NIFTI .gz found at the 0'th index of a string matched to `desc-preproc_bold.nii.gz`")
                     target = 'desc-preproc_bold.nii.gz'
+
                     preProcessedString = [s for s in allNiFTi if s[-len(target):] == target][0]
                     data = nibabel.load(preProcessedString).get_fdata()
                 else:
@@ -400,12 +410,12 @@ class Datum:
             else:
                 raise(AssertionError, "The specified data type is either not supported or not in your BIDS directory.")
             
-            self.preData[d["channel"]] = data
+            self.preProcess[d["channel"]] = data
     def __call__(self, directory):
         return None
         # append to channel directory
     def addChannel(self, channel, data):
-        self.preData[channel] = data
+        self.preProcess[channel] = data
         
 class DataSet:
     r"""
@@ -451,8 +461,8 @@ class Operator:
     packageDir: str
     version: str
         Give the version number for the locally installed package. If the function is self defined then provide the relative directory.
-    arguments: dict
-        The arguments required to run the operator. Unnamed arguments should be assigned to the dictionary entry unnamed.
+    args: dict
+        The args required to run the operator. Unnamed arguments should be assigned to the dictionary entry unnamed.
     internal: dict
         A dictionary of internal operating requirements e.g. broadcast, reduce. Broadcast and reduce will always be applied to the first index of the data channels.
     channelsIn: list
@@ -467,21 +477,21 @@ class Operator:
     The default is to apply the operator to the function channel as is but occasionally you might want to broadcast over a list of elements in the channel e.g. doing a spin correction. To specify the function:
     - function = {"name": name of the function, "package": e.g numpy.random, "version": blank if installed package / directory of user defined function}
     - channels ={{"dataIndex": {"Layer": ["Channel1", "Channel2", etc]}, {"Layer2": ["Channel0"]}}, {"resultIndex": {"Layer": ["SingleChannel"]}}}
-    - arguments = {"unnamed" = [], "alpha": 0, "beta": 1}
+    - args = {"unnamed" = [], "alpha": 0, "beta": 1}
     - inter = {}, {"broadcast": True}
     """
-    opName: str
-    description: str
-    name: str
-    basePackage: str
-    packageDir: str
-    version: str
-    arguments: dict
-    internal: dict
-    channelsIn: list
-    channelOut: list
-    json: list
-    def __init__(self, name=str, description=str, function=dict, channels=dict, args=dict, inter={}):
+ #     opName: str
+ #     description: str
+ #     name: str
+ #     basePackage: str
+ #     packageDir: str
+ #     version: str
+ #     args: dict
+ #     internal: dict
+ #     channelsIn: list
+ #     channelOut: list
+ #     json: list
+    def __init__(self, name: str, description: str, function: dict, channels: dict, args: dict, inter={}):
 
         assert channels["dataIndex"], "You must supply a data channel/s in the form of a dictionary keys for each operator. The operator will broadcast over the supplied channels."
         self.channelsIn = channels["dataIndex"]
@@ -512,31 +522,37 @@ class Operator:
             else:
                 pkg = importlib.import_module(self.basePackage)
                 if pkg:
-                    if pkg.__version__:
-                        self.version = pkg.__version__
-                    elif importlib.metadata(basePkg):
-                        self.version = importlib.metadata(basePkg)
+                    self.version = importlib.metadata.version(self.basePackage)
                 else:
                     warnings.warn("Couldn't find a version for the function being called: setting version to 0.0.0", UserWarning)
                     self.version = "0.0.0"
-        
-        # grab all the defaults of the particular function that aren't included in arguments
-        f = getattr(pkg, self.name)
-        if f.__defaults__==None:
-            full_args = {}
+        # grab all the defaults of the particular function that aren't included in args
+            
+            pkg = importlib.import_module(self.basePackage + "." + self.packageDir)
+            f = getattr(pkg, self.name)
+            
+            if f.__defaults__==None:
+                full_args = {}
+            else:
+                import inspect
+                sig = inspect.signature(f)
+                val = [j.default for j in sig.parameters.values()]
+                key = [j for j in sig.parameters.keys()]
+                full_args = {}# dict(zip(key,val))
+                for i in range(len(key)):
+                    if (not val[i] == inspect._empty):
+                        full_args[key[i]] = val[i]
+
+            shared_keys = tuple(full_args.keys() and args.keys())
+        # change the default args to the user specified ones
+        if shared_keys:
+            for key in shared_keys:
+                full_args[key] = args[key]
         else:
-            full_args = dict(zip(f.__code__.co_varnames[-len(f.__defaults__):], f.__defaults__))
-        
-        shared_keys = tuple(full_args.keys() and args.keys())
-        
-        # change the default arguments to the user specified ones
-        for key in shared_keys:
-            full_args[key] = args[key]
-        
-        self.arguments = full_args
-        
+            full_args = args
+        self.args = full_args
         self.internal = inter
-        self.json = {"function": function, "channels": channels, "args": args, "inter": inter} 
+        self.json = {"name": name, "description": description,"function": function, "channels": channels, "args": self.args, "inter": inter} 
     def __call__(self, data, ret=True):
         """The operator can be used to operate on a datum by specifying the data layers and channels. 
 
@@ -551,39 +567,40 @@ class Operator:
         if type(data) == Datum:
             d = []
             for i in self.channelsIn:
-                if i == "preData":
+                if i == "preProcess":
                     for g in self.channelsIn[i]:
-                        d.append(data.preData[g])
-                elif i == "postData":
+                        d.append(data.preProcess[g])
+                elif i == "postProcess":
                     for g in self.channelsIn[i]:
-                        d.append(data.postData[g])
+                        d.append(data.postProcess[g])
                 else:
                     raise NameError("There is no valid layer by that name.")
             
-            if self.internal["broadcast"]:
+            if "broadcast" in self.internal:
                 # always broadcast over the first provided channel
                 for i in range(d[0]):
                     v = [d[x][i % len(d[x])] for x in d]
-                    res = f(*v, **self.arguments)
+                    res = f(*v, **self.args)
             else:
-                if self.arguments["unnamed"]:
-                    v = self.arguments["unnamed"]
-                    res = f(*d, *v, **self.arguments)
+                if "unamed" in self.args:
+                    v = self.args["unnamed"]
+                    res = f(*d, *v, **self.args)
                 else:    
-                    res = f(*d, **self.arguments)
+                    res = f(*d, **self.args)
             
             for c in self.channelOut:
-                if c == "preData":
-                    data.preData[self.channelOut[c]] = res
-                if c == "postData":
-                    if inter["split"]:
-                        for i in range(len(res)):
-                            data.postData[self.channelOut[c] + str(i) ] = res[i]
-                    else:
-                        data.postData[self.channelOut[c]] = res
+                if c == "preProcess":
+                    data.preProcess[self.channelOut[c]] = res
+                if c == "postProcess":
+                    for g in self.channelOut[c]:
+                        if "split" in self.internal: # and self.internal["split"] == True:
+                            for i in range(len(res)):
+                                data.postProcess[g + str(i) ] = res[i]
+                        else:
+                            data.postProcess[g] = res
         
         elif type(data) == str:
-            f(data, **self.arguments)
+            f(data, **self.args)
         
         elif type(data) == DataSet: 
             for i in self.channelsIn:
@@ -595,7 +612,7 @@ class Operator:
                         d = [data]
   
                 elif i == "postProcess":
-                    d = [[x.postData[g] for g in self.channelsIn[i]] for x in data.data]
+                    d = [[x.postProcess[g] for g in self.channelsIn[i]] for x in data.data]
 
                 elif i == "analysis":
                     ### TO DO: ensure this works for a single data set as well as a list of datasets (recommended)
@@ -618,18 +635,18 @@ class Operator:
                 res = []
                 for i in range(len(d[0])):
                     v = [x[i % len(x)] for x in d]
-                    res.append(f(*v, **self.arguments))
+                    res.append(f(*v, **self.args))
             else:
-                if "unnamed" in self.arguments:
-                    v = self.arguments["unnamed"]
-                    named = self.arguments.copy()
+                if "unnamed" in self.args:
+                    v = self.args["unnamed"]
+                    named = self.args.copy()
                     named.pop("unnamed", 'None')
                     if d:
                         res = f(*d, *v, **named)
                     else:
                         res = f(*v, **named)
                 else:
-                    res = f(*d, **self.arguments)
+                    res = f(*d, **self.args)
             
             for c in self.channelOut:
                 if "split" in self.internal and self.internal["split"] == True:
@@ -643,7 +660,7 @@ class Operator:
                 else:
                     assert len(self.channelOut[c]) <= 1, "Multichannel output not yet supported"
                     
-                    if self.channelOut[c] != []: # empty channels should not through errors or write results
+                    if self.channelOut[c] != []: # empty channels should not throw errors or write results
                         data.analysis[self.channelOut[c][0]] = res
 
             if ret:
@@ -669,15 +686,16 @@ def _preprocess(recipe, bidsdir):
     """
     
     assert "preProcess" in recipe.nodes, "You need to specify the preprocessing operations." 
-    
+     
     ops = recipe.nodes["preProcess"]
     for i in ops:
         if i.basePackage == "cmd":
-            cmdStr =[k + v for (k, v) in i.arguments.items()][0].split()
+            cmdStr =[k + v for (k, v) in i.args.items()][0].split()
             subprocess.run(cmdStr)
         else:
             # the bidsdir includes all names of the subject paths as elements of a vector; the first element of the vector is the root of the data directory
-            [f(bidsdir) for f in ops]
+            i(bidsdir)
+            # [f(bidsdir) for f in ops]
 
 def _process(ops, dataset, nthreads: int, pool=None):
     r""" 

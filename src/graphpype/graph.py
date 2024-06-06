@@ -6,17 +6,27 @@ A collection of graph specific functions. These include graph construction from 
 
 """
 
-import networkx, scipy, numpy, statsmodels
+import networkx, scipy, numpy, statsmodels, nilearn, nibabel
 from graphpype import utils
+
+def atlasDist(atlas="msdl", atlasDir="./data/atlases"):
+    atlasObj = utils.fetchAtlas(atlas, atlasDir)
+    coords = atlasObj["region_coords"]
+    return utils.distanceMat(coords)
+
+def atlasLabels(atlas="msdl", atlasDir="./data/atlases"):
+    atlasObj = utils.fetchAtlas(atlas, atlasDir)
+    labels = atlasObj["labels"]
+    return utils.distanceMat(labels)
 
 def anatNifti(data, atlas="msdl", atlasDir="./data/atlases", standardize="zscore_sample", standardize_confounds="zscore_sample", memory="nilearn_cache", verbose="0", confounds=False):
     "A simple API wrapper for the nilearn function for constructing a covariance matrix according to an atlas from Nifti data formats."
     
     atlasObj = utils.fetchAtlas(atlas, atlasDir)
     
-    maps = atlasObj[0]
+    maps = atlasObj["maps"]
     # convenience function to map the regions of interest
-    masker = NiftiMapsMasker(maps_img=maps, standardize=standardize, standardize_confounds=standize_confounds, memory=memory, verbose=verbose,)
+    masker = nilearn.maskers.NiftiMapsMasker(maps_img=maps, standardize=standardize, standardize_confounds=standardize_confounds, memory=memory, verbose=verbose,)
 
     # generate the covariance matrix
     from sklearn.covariance import GraphicalLassoCV
@@ -24,7 +34,9 @@ def anatNifti(data, atlas="msdl", atlasDir="./data/atlases", standardize="zscore
     estimator.fit(time_series)
     return estimator._covariance
 
-def covNifti(data, atlas="msdl", atlasDir="./data/atlases", standardize="zscore_sample", standardize_confounds="zscore_sample", memory="nilearn_cache", verbose="0", confounds=False):
+def covNifti(data, atlas="msdl", atlasDir="./data/derivatives/atlases/", standardize="zscore_sample", standardize_confounds="zscore_sample", memory="nilearn_cache", verbose=0, memory_level=1, confounds=False):
+
+
     r"""Generate the covariance matrix for an fMRI scan.
     
     Parameters
@@ -55,22 +67,22 @@ def covNifti(data, atlas="msdl", atlasDir="./data/atlases", standardize="zscore_
     "A simple API wrapper for the nilearn function for constructing a covariance matrix according to an atlas from Nifti data formats."
     
     atlasObj = utils.fetchAtlas(atlas, atlasDir)
-    
-    maps = atlasObj[0]
+    maps = atlasObj["maps"] # nilearn.image.smooth_img(atlasObj["maps"], None)
     # convenience function to map the regions of interest
-    masker = NiftiMapsMasker(maps_img=maps, standardize=standardize, standardize_confounds=standize_confounds, memory=memory, verbose=verbose)
+    masker = nilearn.maskers.NiftiMapsMasker(maps_img=maps, standardize=standardize, standardize_confounds=standardize_confounds, memory=memory, memory_level=memory_level, verbose=verbose)
+    data = nibabel.Nifti1Image(data, numpy.eye(4))
     # generate the time series according to the regions of interest provided in the atlas
     if confounds:
         # confounds are located in the second index of the data
         time_series = masker.fit_transform(data[0], confounds=data[1])
     else:
         time_series = masker.fit_transform(data)
-
+    
     # generate the covariance matrix
     from sklearn.covariance import GraphicalLassoCV
     estimator = GraphicalLassoCV()
     estimator.fit(time_series)
-    return estimator._covariance
+    return estimator.covariance_
     
 def wiringCost(adj, dist):
     r"""
@@ -90,7 +102,8 @@ def wiringCost(adj, dist):
     cost : float
         Wiring cost under the induced distance topology.
     """
-     
+    if type(adj) == networkx.DiGraph:
+        adj = networkx.adjacency_matrix(adj)
     sizeAdj = adj.shape
     sizeDist = dist.shape
    
@@ -99,7 +112,7 @@ def wiringCost(adj, dist):
     assert dist.shape[0] == dist.shape[1], "The provided matrix should be square."
     assert adj.shape[0] == dist.shape[0], "The distance and adjacency matrix should have the same dimensions."
 
-    return numpy.sum(datum.adjacency * datum.distance) / sizeAdj[0]
+    return numpy.sum(adj * dist) / sizeAdj[0]
 
 def louvainCommunities(G, seed: int, gpu=False):
     r"""
@@ -377,7 +390,7 @@ def constructedDensityPermutationGraph(covariances, density=0.1, nPermutations=1
 
     return distribution
 
-def constructCovarianceAverageGraph(covariances, density=0.1, seed=0):
+def constructCovarianceAverageGraph(*covariances, density=0.1, seed=0):
     r"""Constructs the average graph over a dataset of covariances using a minimum span density method. 
     
     Parameters
@@ -393,10 +406,10 @@ def constructCovarianceAverageGraph(covariances, density=0.1, seed=0):
     -----
     This allows for individual registration and covariance determination before global averaging.
     """
-    avCovariance = numpy.mean(numpy.array(covariances), axis=0)
+    avCovariance = numpy.mean(numpy.array(covariances), axis=0).squeeze()
     return constructMinSpanDensity(avCovariance, density=density, seed=seed)
 
-def graphComposite(features):
+def graphComposite(d, features):
     r"""
     Takes a graph and a series of features to compose a graph composite. 
     
@@ -497,7 +510,7 @@ def randomCommunityStochasticBlock(g, communities, density=0.1, nGraphs=1000, se
     communities = [networkx.algorithms.community.louvain.louvain_communities(i, seed=(seed + s)) for s, i in enumerate(graphs)]
     return communities
 
-def randomSpin(atlas="msdl", atlasDir="./data/derivatives/atlases/", nPermutations=1000, seed=0):
+def randomSpin(*data, atlas="msdl", atlasDir="./data/derivatives/atlases/", nPermutations=1000, seed=0):
     """
 
     Parameters
@@ -528,11 +541,11 @@ def randomSpin(atlas="msdl", atlasDir="./data/derivatives/atlases/", nPermutatio
     # create the rotational distribution of Euler angles
     sample = numpy.random.rand(3, nPermutations)
 
-    alphaPerm = 2 * numpy.pi * sample[1]
+    alphaPerm = 2 * numpy.pi * sample[0]
 
-    betaPerm = numpy.pi * (sample[2] - 0.5)
+    betaPerm = numpy.pi * (sample[1] - 0.5)
 
-    gammaPerm = 2 * numpy.pi * sample[3]
+    gammaPerm = 2 * numpy.pi * sample[2]
     
     angles = zip(alphaPerm, betaPerm, gammaPerm)
  
@@ -543,33 +556,36 @@ def randomSpin(atlas="msdl", atlasDir="./data/derivatives/atlases/", nPermutatio
     leftRightTransform = numpy.array([[-1,0,0],[0,1,0],[0,0,1]])
     for eulerAngle in angles:
         cosAlpha, cosBeta, cosGamma = numpy.cos(eulerAngle)
-        sinAlpha, sinBeta, sinGamma = nump.sin(eulerAngle)
+        sinAlpha, sinBeta, sinGamma = numpy.sin(eulerAngle)
 
         left = numpy.array([
             [cosBeta * cosGamma, sinAlpha * sinBeta * cosGamma - cosAlpha * sinGamma, cosAlpha * sinBeta * cosGamma + sinAlpha * sinGamma],
-            [cosaBeta * sinGamma, sinAlpha * sinBeta * sinGamma + cosAlpha * cosGamma, cosAlpha * sinBeta * sinGamma - sinAlph * cosGamma],
+            [cosBeta * sinGamma, sinAlpha * sinBeta * sinGamma + cosAlpha * cosGamma, cosAlpha * sinBeta * sinGamma - sinAlpha * cosGamma],
             [-sinBeta, sinAlpha * cosBeta, cosAlpha *  cosBeta]
             ])
         right = left * leftRightTransform
 
-        leftRotationOperator.append(left.tranpose()) # take the inverse of the left rotation as we are rotating the atlas not the data
-        rightRotationOperator.append(right.tranpose()) # take the inverse of the right rotation
+        numpy.append(leftRotationOperator, left.transpose()) # take the inverse of the left rotation as we are rotating the atlas not the data
+        numpy.append(rightRotationOperator, right.transpose()) # take the inverse of the right rotation
 
     # apply rotations; in Nibabel formats RAS+ space is assumed which means the central voxel in the first index corresponds to the left-right midline
     atlasObj = utils.fetchAtlas(atlas, atlasDir)
     
     # Let affine be A, rotation matrix be R, and voxel index tuple be v then: A^(-1) R A v = vr
+    # Assume for a registered atlas A is the identity matrix
 
-    data = atlasObj.maps._dataobj
-    A = atlasObj.maps._affine
-    iA = numpy.inverse(A)
+    # data = atlasObj.maps._dataobj
+    from nilearn import regions as regions
+    data = numpy.array(atlasObj.region_coords) #maps._affine
+    iA = numpy.identity(3) # numpy.linalg.inv(A)
 
     voxInds = numpy.array( [numpy.unravel_index(i, data.shape) for i in range(data.size)])
     midPoint = data.shape[0] // 2 # integer division
     voxLeft = voxInds[voxInds[:,0] < midPoint]#numpy.take(voxInds, indices=arange(0,midPoint), axis)
     voxRight = voxInds[voxInds[:,0] >= midPoint]#numpy.take(voxInds, indices=arange(midPoint, data.shape[0]), axis=0)   
-    voxList = list(map(tuple, voxLeft)).append(list(map(tuple, voxRight)))
-    voxSet = set(voxList)
+    voxListLeft = list(map(tuple, voxLeft))
+    voxListRight = list(map(tuple, voxRight))
+    voxSet = set(voxListLeft + voxListRight)
    
     permutations = []
     for (l, r) in zip(leftRotationOperator, rightRotationOperator):
@@ -598,10 +614,46 @@ def randomSpin(atlas="msdl", atlasDir="./data/derivatives/atlases/", nPermutatio
     permutedAtlases = []
     for p in permutations:
         newAtlas = copy.deepcopy(atlasObj)
-        m = copy.deepcopy(newAtlas.maps._dataobj)
+        m = copy.deepcopy(newAtlas.region_coords)
         for (uT, T) in p: # destroys this permutation
-            newAtlas.maps._dataobj[uT[0], uT[1], uT[2], ...] = m[T[0], T[1], T[2], ...]
+            newAtlas.region_coords[uT[0], uT[1], uT[2]] = m[T[0], T[1], T[2]]
         permutedAtlases.append(newAtlas)
     
     return permutedAtlases
 
+def covAtlasPermute(data, atlases):
+    r"""Generate the covariance matrix for an fMRI scan based on a permuted set of atlasObjects.
+    
+    Parameters
+    ----------
+    data
+        fMRI data object
+    atlas : list
+        List of atlas objects
+    
+    Returns
+    -------
+    covariances : list
+        A list of covariance matrixes between the locations of the specified atlas.
+    """
+    covariances = []
+    for atlasObj in atlases:
+        atlasObj = utils.fetchAtlas(atlas, atlasDir)
+        
+        maps = atlasObj[0]
+        # convenience function to map the regions of interest
+        masker = NiftiMapsMasker(maps_img=maps, standardize=standardize, standardize_confounds=standize_confounds, memory=memory, verbose=verbose)
+        # generate the time series according to the regions of interest provided in the atlas
+        if confounds:
+            # confounds are located in the second index of the data
+            time_series = masker.fit_transform(data[0], confounds=data[1])
+        else:
+            time_series = masker.fit_transform(data)
+
+        # generate the covariance matrix
+        from sklearn.covariance import GraphicalLassoCV
+        estimator = GraphicalLassoCV()
+        estimator.fit(time_series)
+        covariances.append(estimator._covariance)
+
+    return covariances

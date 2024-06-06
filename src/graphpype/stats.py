@@ -244,15 +244,15 @@ def compareDist(dist1, dist2, test='Kolmogorov-Smirnov'):
     -----
     There are some common ways of doing this: assuming the degree distribution takes a specific functional form, or the general Kolmogorov-Smirnov test. Support is provided for degree distributions assumed to be in the power-law form or the Kolmogorov-Smirnov through the `test` keyword  (default `test='Kolmogorov-Smirnov'`)
     """
-
     # assert type is list of integers, or two ecdfs
-    assert (type(dist1) == list or type(dist1) == numpy.ndarray or type(dist1) == statsmodels.distributions.emperical_distribution), "The first distribution should have a type: list, numpy array, or ecdf"
-    assert (type(dist2) == list or type(dist2) == numpy.ndarray or type(dist2) == statsmodels.distributions.emperical_distribution), "The second distribution should have a type: list, numpy array, or ecdf"
+    from statsmodels.distributions import empirical_distribution as ecdf
+    assert (type(dist1) == list or type(dist1) == numpy.ndarray or type(dist1) == ecdf.ECDF), "The first distribution should have a type: list, numpy array, or ecdf"
+    assert (type(dist2) == list or type(dist2) == numpy.ndarray or type(dist2) == ecdf.ECDF), "The second distribution should have a type: list, numpy array, or ecdf"
     
     match test:
     # case switch KS or powerlaw
         case 'Kolmogorov-Smirnov':
-            return scipy.stats.ktest(dist1, dist2)
+            return scipy.stats.kstest(dist1, dist2)
 
 
 def covarianceMatrix(*data, normalise=True):
@@ -444,7 +444,7 @@ def generalLinearModel(*data, sets=[], covariateChannels=[], regressorChannels=[
                     fit[x][y]["model"] = glm
         return fit
 
-def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
+def graphNeuralNetwork(data, graphComposites={}, network={}, learningTask={}):
     """Generalised graph neural networks API call to abstract arbitrary graph data formats and train them following the tfgnn GraphTensor structure.
     
     Parameters
@@ -530,12 +530,6 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
                 writer.write(example.SerializeToString())
 
 
-
-    # create the datasets TFGNN spec
-    trainDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern=learningTask["bidsPath"] + '_train.tfrecord')
-    trainDataSetProvider = train_dataset_provider.get_dataset(context=tf.distribute.InputContext())
-    trainDataSetProvider = trainDataSet.map(lambda serialized: tfgnn.parse_single_example(serialized=serialized, spec=graphSpec))
-
     testDataSetProvider = tfgnn.runner.TFRecordDatasetProvider(file_pattern=learningTask["bidsPath"] + '_validate.tfrecord')
     testDataSetProvider = train_dataset_provider.get_dataset(context=tf.distribute.InputContext())
     testDataSetProvider = testDataSet.map(lambda serialized: tfgnn.parse_single_example(serialized=serialized, spec=graphSpec))
@@ -571,8 +565,8 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
     res = tfgnn.runner.run(
                 train_ds_provider=trainDataProvider,
                 train_padding=runner.FitOrSkipPadding(graphSpec, trainDataProvider),
-                model_fn=model_fn,
-                optimizer_fn=tf.keras.optimizers.Adam,
+                model_fn=modelFunction,
+                optimizer_fn=learningTask["optimizer"], #tf.keras.optimizers.Adam,
                 epochs=learningTask["nEpochs"],
                 trainer=trainer,
                 task=task,
@@ -584,5 +578,12 @@ def graphNeuralNetwork(data, graphComposites=[], network={}, learningTask={}):
 
     return res
             
-                
-            
+def loadFeature(*data):
+
+    data = [i[0] for i in data] # not sure about this
+    assert len(numpy.shape(data[0])) == 1
+
+    dataMat = numpy.array(data).transpose()
+    
+    return dataMat
+ 
