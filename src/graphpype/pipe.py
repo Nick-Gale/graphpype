@@ -527,21 +527,22 @@ class Operator:
                     warnings.warn("Couldn't find a version for the function being called: setting version to 0.0.0", UserWarning)
                     self.version = "0.0.0"
         # grab all the defaults of the particular function that aren't included in args
-            
-            pkg = importlib.import_module(self.basePackage + "." + self.packageDir)
+            print(self.packageDir) 
+            if self.packageDir != "":
+                pkg = importlib.import_module(self.basePackage + "." + self.packageDir)
+            else:
+                pkg = importlib.import_module(self.basePackage)
+
             f = getattr(pkg, self.name)
             
-            if f.__defaults__==None:
-                full_args = {}
-            else:
-                import inspect
-                sig = inspect.signature(f)
-                val = [j.default for j in sig.parameters.values()]
-                key = [j for j in sig.parameters.keys()]
-                full_args = {}# dict(zip(key,val))
-                for i in range(len(key)):
-                    if (not val[i] == inspect._empty):
-                        full_args[key[i]] = val[i]
+            import inspect
+            sig = inspect.signature(f)
+            val = [j.default for j in sig.parameters.values()]
+            key = [j for j in sig.parameters.keys()]
+            full_args = {}# dict(zip(key,val))
+            for i in range(len(key)):
+                if (not val[i] == inspect._empty):
+                    full_args[key[i]] = val[i]
 
             shared_keys = tuple(full_args.keys() and args.keys())
         # change the default args to the user specified ones

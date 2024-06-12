@@ -39,13 +39,13 @@ This method of specifying functions is labourious and can seem an unecessarily v
    oMean = graphpype.pipe.Operator(
                 name="mean",
                 description="Takes the mean of the wiring distance",
-                function={name: "mean",
-                          package: "numpy",
-                          local: 0
-                          }
-                channels={dataIndex: {postProcess: "wiringDistance"},
-                          resultIndex: {analysis: "cost"}
-                          }
+                function={"name": "mean",
+                          "package": "numpy",
+                          "local": 0
+                          },
+                channels={"dataIndex": {"postProcess": "wiringDistance"},
+                          "resultIndex": {"analysis": "cost"}
+                          },
                 args={},
                 inter={}
                 )

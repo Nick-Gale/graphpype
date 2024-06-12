@@ -117,13 +117,13 @@
 <span class="n">oMean</span> <span class="o">=</span> <span class="n">graphpype</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">Operator</span><span class="p">(</span>
              <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
              <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Takes the mean of the wiring distance&quot;</span><span class="p">,</span>
-             <span class="n">function</span><span class="o">=</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-                       <span class="n">package</span><span class="p">:</span> <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
-                       <span class="n">local</span><span class="p">:</span> <span class="mi">0</span>
-                       <span class="p">}</span>
-             <span class="n">channels</span><span class="o">=</span><span class="p">{</span><span class="n">dataIndex</span><span class="p">:</span> <span class="p">{</span><span class="n">postProcess</span><span class="p">:</span> <span class="s2">&quot;wiringDistance&quot;</span><span class="p">},</span>
-                       <span class="n">resultIndex</span><span class="p">:</span> <span class="p">{</span><span class="n">analysis</span><span class="p">:</span> <span class="s2">&quot;cost&quot;</span><span class="p">}</span>
-                       <span class="p">}</span>
+             <span class="n">function</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;package&quot;</span><span class="p">:</span> <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;local&quot;</span><span class="p">:</span> <span class="mi">0</span>
+                       <span class="p">},</span>
+             <span class="n">channels</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dataIndex&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;postProcess&quot;</span><span class="p">:</span> <span class="s2">&quot;wiringDistance&quot;</span><span class="p">},</span>
+                       <span class="s2">&quot;resultIndex&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;cost&quot;</span><span class="p">}</span>
+                       <span class="p">},</span>
              <span class="n">args</span><span class="o">=</span><span class="p">{},</span>
              <span class="n">inter</span><span class="o">=</span><span class="p">{}</span>
              <span class="p">)</span>

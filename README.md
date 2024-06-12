@@ -2,6 +2,8 @@
 An analysis pipeline for complex network analysis ob brain imaging data. There is a focus on reproducible results and to ensure this a recipe template has been designed to incorporate both a workflow and the dependencies of the workflow (package version numbers, software dependencies, etc.). This workflow is not yet containerised but may be done on the user end using container software (e.g. Docker) or a package such as [Neurodesk](https://www.nature.com/articles/s41592-023-02145-x).
 
 ## Installation
+Please activate a python3.10+ environment before installing.
+
 A basic development install can now be performed by downloading the editable install script into a local directory and then running `bash editableInstall.sh`. This will download and install the current version in a virtual enviroment. The changes should be editable. To use run `source venv/bin/activate` to activate the virtual enviroment the install is located in. 
 
 ### Dependencies
