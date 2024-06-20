@@ -81,7 +81,7 @@ The resulting file now defines a portable recipe template. We might also like to
    plotObj = graphpype.utils.generateFlowchart(recipeStandard)
    plotObj.show()
    bidsDict = {"A": "data/splitA", "B": "data/splitB"} 
-   recipeStandard.report(recipe, bidsDict, outputDir="./data/derivatives/", author="Your Name")
+   recipeStandard.report(bidsDict, outputDir="./data/derivatives/", author="Your Name")
 
 For some more examples of recipe templates refer to the Examples page in the documentation.
 
@@ -137,7 +137,7 @@ The following code block pulls a recipe template from the available options, wri
    plotObj = graphpype.utils.generateFlowchart(recipeStandard)
    plotObj.show()
    bidsDict = {"A": "data/splitA", "B": "data/splitB"} 
-   recipeStandard.report(recipe, bidsDict, outputDir="./data/derivatives/", author="Your Name")
-   pipe = graphpype.recipe.Pipeline('./ourNewExample', bids=bidsDict, preprocess=True) 
+   recipeStandard.report(bidsDict, outputDir="./data/derivatives/", author="Your Name")
+   pipe = graphpype.recipe.Pipeline('./ourNewExample', bids=bidsDict) 
    pipe.process()
 
